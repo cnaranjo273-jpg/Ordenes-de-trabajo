@@ -1,0 +1,132 @@
+<!-- ================= BACKEND (Flask) ================= -->
+# Guardar como: app.py
+
+from flask import Flask, request, jsonify
+import gspread
+from google.oauth2.service_account import Credentials
+
+app = Flask(__name__)
+
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+creds = Credentials.from_service_account_file('service_account.json', scopes=SCOPES)
+client = gspread.authorize(creds)
+
+SHEET_ID = "1PCEFPTZlPYqeffbCZHLw6i46CGNMR-Lf"
+sheet = client.open_by_key(SHEET_ID).sheet1
+
+@app.route('/guardar', methods=['POST'])
+def guardar():
+    data = request.json
+
+    # Obtener número automático
+    registros = sheet.get_all_values()
+    numero = len(registros)
+
+    fila = [
+        numero,
+        data.get("linea", ""),
+        data.get("actividad", ""),
+        data.get("avance_semanal", ""),
+        data.get("avance_acumulado", ""),
+        data.get("ot", ""),
+        data.get("responsables", ""),
+        data.get("responsable", ""),
+        data.get("dia", ""),
+        data.get("personas", ""),
+        data.get("horas", ""),
+        data.get("actividades", "")
+    ]
+
+    sheet.append_row(fila)
+
+    return jsonify({"status": "ok", "numero": numero})
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+<!-- ================= FRONTEND ================= -->
+<!-- Guardar como: index.html -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Procesador OT Web</title>
+<style>
+body { font-family: Arial; background:#f4f4f4; padding:20px; }
+.container { max-width:800px; margin:auto; background:white; padding:20px; border-radius:10px; }
+input, textarea { width:100%; padding:10px; margin:5px 0; }
+button { background:#4CAF50; color:white; padding:10px; border:none; width:100%; }
+</style>
+</head>
+<body>
+
+<div class="container">
+<h2>📄 Procesador OT</h2>
+
+<form id="formOT">
+<input name="linea" placeholder="Línea/Subestación" required>
+<input name="actividad" placeholder="Actividad" required>
+<input name="avance_semanal" placeholder="Avance semanal">
+<input name="avance_acumulado" placeholder="Avance acumulado">
+<input name="ot" placeholder="OT" required>
+<input name="responsables" placeholder="Responsables">
+<input name="responsable" placeholder="Responsable">
+<input name="dia" placeholder="Día">
+<input name="personas" placeholder="Número de personas">
+<input name="horas" placeholder="Horas hombre">
+<textarea name="actividades" placeholder="Actividades"></textarea>
+
+<button type="submit">Guardar</button>
+</form>
+
+<p id="mensaje"></p>
+</div>
+
+<script>
+document.getElementById("formOT").addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const data = Object.fromEntries(new FormData(e.target));
+
+    const res = await fetch("http://localhost:5000/guardar", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    document.getElementById("mensaje").innerText = "✅ Guardado correctamente. N°: " + result.numero;
+
+    e.target.reset();
+});
+</script>
+
+</body>
+</html>
+
+
+<!-- ================= INSTRUCCIONES ================= -->
+
+# 1. Instalar dependencias
+# pip install flask gspread google-auth
+
+# 2. Crear Service Account en Google Cloud
+# Descargar service_account.json
+
+# 3. Compartir tu Google Sheet con el correo del service account
+
+# 4. Ejecutar backend
+# python app.py
+
+# 5. Abrir index.html en navegador
+
+# ================= DESPLIEGUE =================
+# Backend: subir a Render
+# Frontend: subir a Vercel
+
+# IMPORTANTE:
+# Cambiar URL fetch por la URL pública del backend
