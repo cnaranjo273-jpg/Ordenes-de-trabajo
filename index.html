@@ -1,139 +1,137 @@
-<!-- ================= BACKEND (Flask) ================= -->
-# (SIN CAMBIOS - USA EL MISMO app.py)
+<!-- ================= BACKEND FINAL CORREGIDO ================= -->
+# Guardar como: app.py
+
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import gspread
+from google.oauth2.service_account import Credentials
+
+app = Flask(__name__)
+CORS(app)  # 🔥 SOLUCION CORS
+
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+creds = Credentials.from_service_account_file('service_account.json', scopes=SCOPES)
+client = gspread.authorize(creds)
+
+SHEET_ID = "1PCEFPTZlPYqeffbCZHLw6i46CGNMR-Lf"
+sheet = client.open_by_key(SHEET_ID).sheet1
+
+@app.route('/guardar', methods=['POST'])
+def guardar():
+    try:
+        data = request.json
+
+        registros = sheet.get_all_values()
+        numero = len(registros)
+
+        fila = [
+            numero,
+            data.get("linea", ""),
+            data.get("actividad", ""),
+            data.get("avance_semanal", ""),
+            data.get("avance_acumulado", ""),
+            data.get("ot", ""),
+            data.get("responsables", ""),
+            data.get("responsable", ""),
+            data.get("dia", ""),
+            data.get("personas", ""),
+            data.get("horas", ""),
+            data.get("actividades", "")
+        ]
+
+        sheet.append_row(fila)
+
+        return jsonify({"status": "ok", "numero": numero})
+
+    except Exception as e:
+        return jsonify({"status": "error", "mensaje": str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
 
-<!-- ================= FRONTEND MEJORADO ================= -->
+<!-- ================= FRONTEND FINAL CORREGIDO ================= -->
+<!-- Guardar como: index.html -->
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Procesador OT Web</title>
+<title>Procesador OT</title>
 
 <style>
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: Arial;
   background: linear-gradient(135deg, #1e3c72, #2a5298);
   margin: 0;
 }
-
 .container {
   max-width: 900px;
   margin: 40px auto;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  padding: 30px;
+  padding: 25px;
+  border-radius: 10px;
 }
-
-h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 15px;
+  gap: 10px;
 }
-
-.full {
-  grid-column: 1 / 3;
-}
-
+.full { grid-column: 1 / 3; }
 input, textarea {
-  width: 100%;
   padding: 10px;
-  border-radius: 6px;
   border: 1px solid #ccc;
-  font-size: 14px;
+  border-radius: 6px;
 }
-
-input:focus, textarea:focus {
-  outline: none;
-  border-color: #2a5298;
-  box-shadow: 0 0 5px rgba(42,82,152,0.3);
-}
-
 button {
   background: #2a5298;
   color: white;
   padding: 12px;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: 0.3s;
 }
-
-button:hover {
-  background: #1e3c72;
-}
-
-#mensaje {
-  text-align: center;
-  margin-top: 15px;
-  font-weight: bold;
-}
-
-.loader {
-  display: none;
-  text-align: center;
-  margin-top: 10px;
-}
-
+#mensaje { margin-top: 10px; text-align: center; }
 </style>
 </head>
 
 <body>
 
 <div class="container">
-<h2>📄 Procesador de Órdenes de Trabajo</h2>
+<h2>📄 Procesador OT</h2>
 
 <form id="formOT">
 <div class="grid">
-
-<input class="full" name="linea" placeholder="Línea/Subestación" required>
+<input class="full" name="linea" placeholder="Línea" required>
 <input class="full" name="actividad" placeholder="Actividad" required>
-
-<input name="avance_semanal" placeholder="Avance semanal (%)">
-<input name="avance_acumulado" placeholder="Avance acumulado (%)">
-
+<input name="avance_semanal" placeholder="Avance semanal">
+<input name="avance_acumulado" placeholder="Avance acumulado">
 <input name="ot" placeholder="OT" required>
 <input name="dia" placeholder="Día">
-
 <input name="responsables" placeholder="Responsables">
 <input name="responsable" placeholder="Responsable">
-
-<input name="personas" placeholder="N° Personas">
-<input name="horas" placeholder="Horas Hombre">
-
-<textarea class="full" name="actividades" placeholder="Detalle de actividades"></textarea>
-
-<button class="full" type="submit">💾 Guardar Registro</button>
-
+<input name="personas" placeholder="Personas">
+<input name="horas" placeholder="Horas">
+<textarea class="full" name="actividades" placeholder="Actividades"></textarea>
+<button class="full" type="submit">Guardar</button>
 </div>
 </form>
 
-<div class="loader" id="loader">⏳ Guardando...</div>
 <p id="mensaje"></p>
-
 </div>
 
 <script>
 document.getElementById("formOT").addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const loader = document.getElementById("loader");
     const mensaje = document.getElementById("mensaje");
-
-    loader.style.display = "block";
-    mensaje.innerText = "";
+    mensaje.innerText = "Guardando...";
 
     const data = Object.fromEntries(new FormData(e.target));
 
     try {
-        const res = await fetch("http://localhost:5000/guardar", {
+        const res = await fetch("http://127.0.0.1:5000/guardar", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(data)
@@ -141,16 +139,17 @@ document.getElementById("formOT").addEventListener("submit", async (e) => {
 
         const result = await res.json();
 
-        loader.style.display = "none";
-        mensaje.style.color = "green";
-        mensaje.innerText = "✅ Guardado correctamente | N° " + result.numero;
-
-        e.target.reset();
+        if (result.status === "ok") {
+            mensaje.style.color = "green";
+            mensaje.innerText = "✅ Guardado N° " + result.numero;
+            e.target.reset();
+        } else {
+            throw new Error(result.mensaje);
+        }
 
     } catch (error) {
-        loader.style.display = "none";
         mensaje.style.color = "red";
-        mensaje.innerText = "❌ Error al guardar";
+        mensaje.innerText = "❌ Error: " + error.message;
         console.error(error);
     }
 });
@@ -160,16 +159,22 @@ document.getElementById("formOT").addEventListener("submit", async (e) => {
 </html>
 
 
-<!-- ================= MEJORAS INCLUIDAS ================= -->
-# ✔ Diseño moderno tipo sistema
-# ✔ Responsive (celular / PC)
-# ✔ Loader mientras guarda
-# ✔ Mensajes de éxito/error
-# ✔ Inputs organizados en grid
-# ✔ Mejor UX
+<!-- ================= INSTRUCCIONES FINALES ================= -->
 
-# SIGUIENTE NIVEL (si quieres):
-# - Autocompletado
-# - Historial de registros
-# - Login
-# - Dashboard
+# 1. Instalar todo
+# pip install flask flask-cors gspread google-auth
+
+# 2. Ejecutar backend
+# python app.py
+
+# 3. Ejecutar frontend
+# python -m http.server 5500
+
+# 4. Abrir en navegador
+# http://localhost:5500
+
+# 🔥 SI NO FUNCIONA:
+# - Revisar consola F12
+# - Revisar terminal Python
+# - Verificar service_account.json
+# - Verificar permisos del Sheet
