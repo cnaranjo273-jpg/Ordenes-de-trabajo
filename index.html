@@ -1,180 +1,631 @@
-<!-- ================= BACKEND FINAL CORREGIDO ================= -->
-# Guardar como: app.py
-
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import gspread
-from google.oauth2.service_account import Credentials
-
-app = Flask(__name__)
-CORS(app)  # 🔥 SOLUCION CORS
-
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-creds = Credentials.from_service_account_file('service_account.json', scopes=SCOPES)
-client = gspread.authorize(creds)
-
-SHEET_ID = "1PCEFPTZlPYqeffbCZHLw6i46CGNMR-Lf"
-sheet = client.open_by_key(SHEET_ID).sheet1
-
-@app.route('/guardar', methods=['POST'])
-def guardar():
-    try:
-        data = request.json
-
-        registros = sheet.get_all_values()
-        numero = len(registros)
-
-        fila = [
-            numero,
-            data.get("linea", ""),
-            data.get("actividad", ""),
-            data.get("avance_semanal", ""),
-            data.get("avance_acumulado", ""),
-            data.get("ot", ""),
-            data.get("responsables", ""),
-            data.get("responsable", ""),
-            data.get("dia", ""),
-            data.get("personas", ""),
-            data.get("horas", ""),
-            data.get("actividades", "")
-        ]
-
-        sheet.append_row(fila)
-
-        return jsonify({"status": "ok", "numero": numero})
-
-    except Exception as e:
-        return jsonify({"status": "error", "mensaje": str(e)}), 500
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
-
-
-<!-- ================= FRONTEND FINAL CORREGIDO ================= -->
-<!-- Guardar como: index.html -->
+<!-- ================= CÓDIGO COMPLETO UNIFICADO ================= -->
+<!-- Guardar como: app.py -->
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Procesador OT</title>
-
+<title>Sistema Procesador OT - Full Stack</title>
 <style>
-body {
-  font-family: Arial;
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-  margin: 0;
-}
-.container {
-  max-width: 900px;
-  margin: 40px auto;
-  background: white;
-  padding: 25px;
-  border-radius: 10px;
-}
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.full { grid-column: 1 / 3; }
-input, textarea {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-button {
-  background: #2a5298;
-  color: white;
-  padding: 12px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-#mensaje { margin-top: 10px; text-align: center; }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+    
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        overflow: hidden;
+        animation: slideIn 0.5s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .header h2 {
+        font-size: 28px;
+        margin-bottom: 10px;
+    }
+    
+    .header p {
+        opacity: 0.9;
+        font-size: 14px;
+    }
+    
+    .content {
+        padding: 30px;
+    }
+    
+    .status-bar {
+        background: #f0f0f0;
+        padding: 12px 20px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .status-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #4caf50;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    
+    .status-dot.offline {
+        background: #f44336;
+    }
+    
+    .stats {
+        display: flex;
+        gap: 20px;
+        font-size: 14px;
+    }
+    
+    .stats span {
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .full {
+        grid-column: 1 / -1;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    label {
+        font-size: 12px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #555;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    input, textarea, select {
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.3s;
+        font-family: inherit;
+    }
+    
+    input:focus, textarea:focus, select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
+    .message {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: bold;
+        animation: fadeIn 0.3s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .message.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .message.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .message.info {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+    
+    .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    @media (max-width: 768px) {
+        .grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .status-bar {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
 </style>
 </head>
-
 <body>
-
 <div class="container">
-<h2>📄 Procesador OT</h2>
-
-<form id="formOT">
-<div class="grid">
-<input class="full" name="linea" placeholder="Línea" required>
-<input class="full" name="actividad" placeholder="Actividad" required>
-<input name="avance_semanal" placeholder="Avance semanal">
-<input name="avance_acumulado" placeholder="Avance acumulado">
-<input name="ot" placeholder="OT" required>
-<input name="dia" placeholder="Día">
-<input name="responsables" placeholder="Responsables">
-<input name="responsable" placeholder="Responsable">
-<input name="personas" placeholder="Personas">
-<input name="horas" placeholder="Horas">
-<textarea class="full" name="actividades" placeholder="Actividades"></textarea>
-<button class="full" type="submit">Guardar</button>
-</div>
-</form>
-
-<p id="mensaje"></p>
+    <div class="header">
+        <h2>📊 Sistema Procesador OT</h2>
+        <p>Gestión de Órdenes de Trabajo y Actividades</p>
+    </div>
+    
+    <div class="content">
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Verificando conexión...</span>
+            </div>
+            <div class="stats">
+                <div>📝 Último registro: <span id="lastRecord">-</span></div>
+                <div>💾 Total registros: <span id="totalRecords">-</span></div>
+            </div>
+        </div>
+        
+        <form id="formOT">
+            <div class="grid">
+                <div class="form-group full">
+                    <label>📌 Línea *</label>
+                    <input name="linea" placeholder="Ej: Línea de Producción 1" required>
+                </div>
+                
+                <div class="form-group full">
+                    <label>⚙️ Actividad *</label>
+                    <input name="actividad" placeholder="Descripción de la actividad" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>📈 Avance Semanal</label>
+                    <input name="avance_semanal" placeholder="Ej: 75%">
+                </div>
+                
+                <div class="form-group">
+                    <label>📊 Avance Acumulado</label>
+                    <input name="avance_acumulado" placeholder="Ej: 60%">
+                </div>
+                
+                <div class="form-group">
+                    <label>🔖 OT *</label>
+                    <input name="ot" placeholder="Número de OT" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>📅 Día</label>
+                    <input name="dia" placeholder="Fecha o día de la semana">
+                </div>
+                
+                <div class="form-group">
+                    <label>👥 Responsables</label>
+                    <input name="responsables" placeholder="Nombres de responsables">
+                </div>
+                
+                <div class="form-group">
+                    <label>👤 Responsable Principal</label>
+                    <input name="responsable" placeholder="Nombre del responsable principal">
+                </div>
+                
+                <div class="form-group">
+                    <label>👷 Personas</label>
+                    <input name="personas" placeholder="Cantidad de personas">
+                </div>
+                
+                <div class="form-group">
+                    <label>⏱️ Horas</label>
+                    <input name="horas" placeholder="Horas trabajadas">
+                </div>
+                
+                <div class="form-group full">
+                    <label>📝 Actividades Detalladas</label>
+                    <textarea name="actividades" placeholder="Descripción detallada de las actividades realizadas..."></textarea>
+                </div>
+            </div>
+            
+            <button type="submit" id="submitBtn">
+                💾 Guardar Registro
+            </button>
+        </form>
+        
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
 </div>
 
 <script>
-document.getElementById("formOT").addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const mensaje = document.getElementById("mensaje");
-    mensaje.innerText = "Guardando...";
-
-    const data = Object.fromEntries(new FormData(e.target));
-
-    try {
-        const res = await fetch("http://127.0.0.1:5000/guardar", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(data)
-        });
-
-        const result = await res.json();
-
-        if (result.status === "ok") {
-            mensaje.style.color = "green";
-            mensaje.innerText = "✅ Guardado N° " + result.numero;
-            e.target.reset();
-        } else {
-            throw new Error(result.mensaje);
-        }
-
-    } catch (error) {
-        mensaje.style.color = "red";
-        mensaje.innerText = "❌ Error: " + error.message;
-        console.error(error);
+    // Configuración de la API
+    const API_URL = window.location.origin;
+    let totalRecordsCount = 0;
+    
+    // Elementos del DOM
+    const form = document.getElementById('formOT');
+    const submitBtn = document.getElementById('submitBtn');
+    const messageDiv = document.getElementById('message');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const lastRecordSpan = document.getElementById('lastRecord');
+    const totalRecordsSpan = document.getElementById('totalRecords');
+    
+    // Función para mostrar mensajes
+    function showMessage(text, type = 'info') {
+        messageDiv.textContent = text;
+        messageDiv.className = `message ${type}`;
+        messageDiv.style.display = 'block';
+        
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
     }
-});
+    
+    // Función para verificar el estado del servidor
+    async function checkServerStatus() {
+        try {
+            const response = await fetch(`${API_URL}/health`);
+            if (response.ok) {
+                const data = await response.json();
+                statusDot.className = 'status-dot';
+                statusText.textContent = '🟢 Conectado';
+                if (data.total_records !== undefined) {
+                    totalRecordsCount = data.total_records;
+                    totalRecordsSpan.textContent = data.total_records;
+                    lastRecordSpan.textContent = data.last_record || '-';
+                }
+                return true;
+            } else {
+                throw new Error('Servidor no responde');
+            }
+        } catch (error) {
+            statusDot.className = 'status-dot offline';
+            statusText.textContent = '🔴 Desconectado';
+            showMessage('⚠️ No se pudo conectar con el servidor. Asegúrate de que el backend esté ejecutándose.', 'error');
+            return false;
+        }
+    }
+    
+    // Función para guardar datos
+    async function saveData(data) {
+        try {
+            const response = await fetch(`${API_URL}/guardar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            throw new Error(`Error de red: ${error.message}`);
+        }
+    }
+    
+    // Manejar envío del formulario
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Verificar conexión antes de enviar
+        const isConnected = await checkServerStatus();
+        if (!isConnected) {
+            showMessage('❌ No hay conexión con el servidor. Por favor, verifica que el backend esté corriendo.', 'error');
+            return;
+        }
+        
+        // Deshabilitar botón y mostrar loading
+        submitBtn.disabled = true;
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="loading"></span> Guardando...';
+        
+        // Obtener datos del formulario
+        const formData = new FormData(form);
+        const data = {};
+        for (let [key, value] of formData.entries()) {
+            data[key] = value;
+        }
+        
+        try {
+            const result = await saveData(data);
+            
+            if (result.status === 'ok') {
+                showMessage(`✅ Registro guardado exitosamente! Número: ${result.numero}`, 'success');
+                form.reset();
+                
+                // Actualizar estadísticas
+                totalRecordsCount++;
+                totalRecordsSpan.textContent = totalRecordsCount;
+                lastRecordSpan.textContent = result.numero;
+                
+                // Efecto de éxito en el botón
+                submitBtn.style.background = '#4caf50';
+                setTimeout(() => {
+                    submitBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                }, 1000);
+            } else {
+                throw new Error(result.mensaje || 'Error desconocido');
+            }
+        } catch (error) {
+            showMessage(`❌ Error: ${error.message}`, 'error');
+            console.error('Error detallado:', error);
+        } finally {
+            // Rehabilitar botón
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    });
+    
+    // Verificar estado inicial
+    checkServerStatus();
+    
+    // Verificar estado cada 30 segundos
+    setInterval(checkServerStatus, 30000);
 </script>
-
 </body>
 </html>
 
+<!-- ================= BACKEND FLASK (MISMO ARCHIVO) ================= -->
+<!-- Este código se ejecuta cuando se importa como app.py -->
 
-<!-- ================= INSTRUCCIONES FINALES ================= -->
+"""
 
-# 1. Instalar todo
-# pip install flask flask-cors gspread google-auth
+BACKEND FLASK - AGREGAR AL MISMO ARCHIVO app.py
+"""
 
-# 2. Ejecutar backend
-# python app.py
+from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS
+import gspread
+from google.oauth2.service_account import Credentials
+import os
+import sys
+import json
 
-# 3. Ejecutar frontend
-# python -m http.server 5500
-
-# 4. Abrir en navegador
-# http://localhost:5500
-
-# 🔥 SI NO FUNCIONA:
-# - Revisar consola F12
-# - Revisar terminal Python
-# - Verificar service_account.json
-# - Verificar permisos del Sheet
+# Verificar si estamos ejecutando el backend
+if __name__ == '__main__':
+    
+    app = Flask(__name__, static_folder='.')
+    CORS(app)
+    
+    # Configuración de Google Sheets
+    SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+    SHEET_ID = "1PCEFPTZlPYqeffbCZHLw6i46CGNMR-Lf"
+    
+    # Verificar archivo de credenciales
+    CREDENTIALS_FILE = 'service_account.json'
+    
+    if not os.path.exists(CREDENTIALS_FILE):
+        print("=" * 60)
+        print("❌ ERROR: No se encuentra el archivo service_account.json")
+        print("=" * 60)
+        print("\n📋 Pasos para configurar Google Sheets:")
+        print("1. Ve a https://console.cloud.google.com/")
+        print("2. Crea un proyecto o selecciona uno existente")
+        print("3. Habilita la API de Google Sheets")
+        print("4. Crea una cuenta de servicio y descarga el JSON")
+        print("5. Renombra el archivo a 'service_account.json'")
+        print("6. Comparte tu hoja de cálculo con el email de la cuenta de servicio")
+        print("=" * 60)
+        sys.exit(1)
+    
+    try:
+        creds = Credentials.from_service_account_file(CREDENTIALS_FILE, scopes=SCOPES)
+        client = gspread.authorize(creds)
+        sheet = client.open_by_key(SHEET_ID).sheet1
+        
+        # Probar conexión
+        test_data = sheet.get_all_values()
+        print("✅ Conexión exitosa con Google Sheets")
+        print(f"📊 Total de registros actuales: {len(test_data)}")
+        
+    except Exception as e:
+        print("=" * 60)
+        print("❌ ERROR DE CONEXIÓN CON GOOGLE SHEETS")
+        print("=" * 60)
+        print(f"\nError detallado: {e}\n")
+        print("Posibles soluciones:")
+        print("1. Verifica que el SHEET_ID sea correcto")
+        print("2. Comparte la hoja con el email de la cuenta de servicio")
+        print("3. Asegúrate de que la API de Google Sheets esté habilitada")
+        print("4. Verifica los permisos del archivo service_account.json")
+        print("=" * 60)
+        sys.exit(1)
+    
+    @app.route('/')
+    def index():
+        """Servir el archivo HTML principal"""
+        return send_file('app.py', mimetype='text/html')
+    
+    @app.route('/health', methods=['GET'])
+    def health():
+        """Endpoint para verificar el estado del servidor"""
+        try:
+            registros = sheet.get_all_values()
+            total = len(registros)
+            last_record = registros[-1][0] if total > 1 else 0
+            
+            return jsonify({
+                "status": "ok",
+                "total_records": total,
+                "last_record": last_record,
+                "message": "Servidor funcionando correctamente"
+            })
+        except Exception as e:
+            return jsonify({
+                "status": "error",
+                "message": str(e)
+            }), 500
+    
+    @app.route('/guardar', methods=['POST'])
+    def guardar():
+        """Endpoint para guardar nuevos registros"""
+        try:
+            data = request.json
+            print(f"📝 Recibiendo datos: {data}")
+            
+            # Obtener número de registro
+            registros = sheet.get_all_values()
+            numero = len(registros)
+            
+            # Construir fila
+            fila = [
+                numero,  # ID autoincremental
+                data.get("linea", ""),
+                data.get("actividad", ""),
+                data.get("avance_semanal", ""),
+                data.get("avance_acumulado", ""),
+                data.get("ot", ""),
+                data.get("responsables", ""),
+                data.get("responsable", ""),
+                data.get("dia", ""),
+                data.get("personas", ""),
+                data.get("horas", ""),
+                data.get("actividades", "")
+            ]
+            
+            # Agregar a Google Sheets
+            sheet.append_row(fila)
+            
+            print(f"✅ Registro guardado exitosamente - ID: {numero}")
+            
+            return jsonify({
+                "status": "ok",
+                "numero": numero,
+                "mensaje": "Registro guardado exitosamente"
+            })
+            
+        except Exception as e:
+            print(f"❌ Error al guardar: {e}")
+            return jsonify({
+                "status": "error",
+                "mensaje": str(e)
+            }), 500
+    
+    @app.route('/registros', methods=['GET'])
+    def obtener_registros():
+        """Endpoint para obtener todos los registros"""
+        try:
+            registros = sheet.get_all_values()
+            return jsonify({
+                "status": "ok",
+                "registros": registros,
+                "total": len(registros)
+            })
+        except Exception as e:
+            return jsonify({
+                "status": "error",
+                "mensaje": str(e)
+            }), 500
+    
+    # Iniciar servidor
+    print("\n" + "=" * 60)
+    print("🚀 INICIANDO SERVIDOR PROCESADOR OT")
+    print("=" * 60)
+    print(f"📁 Archivo de credenciales: {CREDENTIALS_FILE}")
+    print(f"📊 ID de hoja de cálculo: {SHEET_ID}")
+    print("\n🌐 Servidores disponibles:")
+    print(f"   • Local:   http://localhost:5000")
+    print(f"   • Red:     http://{os.popen('hostname -I').read().strip().split()[0]}:5000")
+    print("\n📋 Endpoints:")
+    print(f"   • Frontend: http://localhost:5000")
+    print(f"   • Health:   http://localhost:5000/health")
+    print(f"   • Guardar:  http://localhost:5000/guardar (POST)")
+    print(f"   • Listar:   http://localhost:5000/registros (GET)")
+    print("\n⚠️  Presiona CTRL+C para detener el servidor")
+    print("=" * 60 + "\n")
+    
+    app.run(host='0.0.0.0', port=5000, debug=True)
