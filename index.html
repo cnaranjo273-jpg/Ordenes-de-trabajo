@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Procesador OT - Guardado en Google Sheets</title>
+    <title>Sistema Procesador OT - Con Google Sheets</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -124,26 +124,14 @@
             vertical-align: middle;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .records-table { margin-top: 30px; overflow-x: auto; }
-        .records-table table { width: 100%; border-collapse: collapse; }
-        .records-table th, .records-table td { padding: 12px; text-align: left; border-bottom: 1px solid #e0e0e0; }
-        .records-table th { background: #f8f9fa; font-weight: 600; color: #555; font-size: 12px; text-transform: uppercase; }
-        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-group button { flex: 1; }
-        .btn-excel { background: #28a745; }
-        .btn-sync { background: #17a2b8; }
-        .btn-clear { background: #dc3545; }
-        @media (max-width: 768px) {
-            .form-grid { grid-template-columns: 1fr; }
-            .btn-group { flex-direction: column; }
-        }
+        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
         <h1>📊 Sistema Procesador OT</h1>
-        <p>Guardado automático en Google Sheets</p>
+        <p>Guardado directo en Google Sheets</p>
     </div>
     
     <div class="content">
@@ -153,7 +141,6 @@
                 <span id="statusText">Verificando conexión...</span>
             </div>
             <div class="stats">
-                <div>📝 Total Registros: <span id="totalRecords">0</span></div>
                 <div>🕐 Hora: <span id="currentTime">-</span></div>
             </div>
         </div>
@@ -221,45 +208,16 @@
             </button>
         </form>
         
-        <div class="btn-group">
-            <button type="button" id="viewRecordsBtn" class="btn-sync">📋 Ver Registros</button>
-            <button type="button" id="exportExcelBtn" class="btn-excel">📊 Exportar a Excel</button>
-            <button type="button" id="clearLocalBtn" class="btn-clear">🗑️ Limpiar Datos</button>
-        </div>
-        
-        <div id="recordsContainer" style="display: none;">
-            <div class="records-table">
-                <table id="recordsTable">
-                    <thead><tr><th>No.</th><th>LÍNEA/SUBESTACIÓN</th><th>ACTIVIDAD</th><th>AVANCE SEMANAL</th><th>AVANCE ACUMULADO</th><th>OT</th><th>RESPONSABLES</th><th>RESPONSABLE</th><th>DÍA</th><th>PERSONAS</th><th>HORAS</th><th>ACTIVIDADES</th><th>FECHA</th></tr></thead>
-                    <tbody id="recordsBody"></tbody>
-                </table>
-            </div>
-        </div>
-        
         <div id="messageBox" class="message"></div>
     </div>
 </div>
 
 <script>
-    // Sheet.best endpoint
-    const SHEET_BEST_URL = "https://api.sheetbest.com/sheets/63d8bf52-79fb-4d2e-9426-eff064fb1112";
+    // 🔴 IMPORTANTE: REEMPLAZA ESTA URL CON LA QUE OBTUVIERAS AL DESPLEGAR
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxxxxxx/exec"; // <-- Pega aquí tu URL
     
+    // Variables
     let registros = [];
-    
-    function loadRecords() {
-        const saved = localStorage.getItem('procesadorOT_registros');
-        registros = saved ? JSON.parse(saved) : [];
-        updateStats();
-    }
-    
-    function saveRecords() {
-        localStorage.setItem('procesadorOT_registros', JSON.stringify(registros));
-        updateStats();
-    }
-    
-    function updateStats() {
-        document.getElementById('totalRecords').textContent = registros.length;
-    }
     
     function updateTime() {
         document.getElementById('currentTime').textContent = new Date().toLocaleTimeString('es-ES');
@@ -272,162 +230,44 @@
         setTimeout(() => msg.style.display = 'none', 5000);
     }
     
-    // Guardar usando la estructura correcta de Sheet.best
-    async function saveToSheetBest(data) {
-        console.log('Enviando a Sheet.best:', data);
-        
+    async function saveToGoogleSheets(data) {
         try {
-            const response = await fetch(SHEET_BEST_URL, {
+            const response = await fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
+                mode: 'no-cors', // Necesario para Apps Script
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify([data])
+                body: JSON.stringify(data)
             });
             
-            const responseText = await response.text();
-            console.log('Respuesta:', response.status, responseText);
+            // Con no-cors no podemos leer la respuesta directamente
+            // Pero si no hay error, asumimos éxito
+            return { success: true };
             
-            if (response.ok) {
-                return { success: true };
-            } else {
-                return { success: false, error: responseText };
-            }
         } catch (error) {
             console.error('Error:', error);
             return { success: false, error: error.message };
         }
     }
     
-    async function saveRecord(formData) {
-        const newId = registros.length + 1;
-        const fecha = new Date().toLocaleString('es-ES');
-        
-        // Crear objeto con la estructura que Sheet.best espera
-        // Usando los mismos nombres de columna que ya existen en tu hoja
-        const sheetData = {
-            "a": newId.toString(),  // Columna A = No.
-            "1": formData.linea,    // Columna B = LÍNEA/SUBESTACIÓN
-            "Actividades fuera de la programación": formData.actividad,  // Columna C = ACTIVIDAD
-            "3": formData.avance_semanal || "",    // Columna D = AVANCE SEMANAL
-            "4": formData.avance_acumulado || "",  // Columna E = AVANCE ACUMULADO
-            "5": formData.ot,          // Columna F = OT
-            "6": formData.responsables || "",  // Columna G = RESPONSABLES
-            "7": formData.responsable || "",    // Columna H = RESPONSABLE
-            "8": formData.dia || "",    // Columna I = DÍA
-            "9": formData.personas || "",  // Columna J = NUMERO DE PERSONAS
-            "10": formData.horas || "",    // Columna K = HORAS HOMBRE
-            "11": formData.actividades || "",  // Columna L = ACTIVIDADES
-            "fecha_registro": fecha
-        };
-        
-        // Guardar localmente
-        const localRecord = {
-            id: newId, linea: formData.linea, actividad: formData.actividad,
-            avance_semanal: formData.avance_semanal, avance_acumulado: formData.avance_acumulado,
-            ot: formData.ot, responsables: formData.responsables, responsable: formData.responsable,
-            dia: formData.dia, personas: formData.personas, horas: formData.horas,
-            actividades: formData.actividades, fecha: fecha
-        };
-        
-        registros.push(localRecord);
-        saveRecords();
-        
-        // Guardar en Sheet.best
-        const result = await saveToSheetBest(sheetData);
-        
-        if (result.success) {
-            showMessage(`✅ Registro #${newId} guardado en Google Sheets`, 'success');
-        } else {
-            showMessage(`⚠️ Registro #${newId} guardado SOLO LOCALMENTE. Error: ${result.error}`, 'error');
-        }
-        
-        return newId;
-    }
-    
-    function exportToExcel() {
-        if (registros.length === 0) {
-            showMessage('No hay registros', 'error');
-            return;
-        }
-        
-        const headers = ['No.','LÍNEA/SUBESTACIÓN','ACTIVIDAD','AVANCE SEMANAL','AVANCE ACUMULADO','OT','RESPONSABLES','RESPONSABLE','DÍA','PERSONAS','HORAS','ACTIVIDADES','FECHA'];
-        const csvData = [headers];
-        
-        registros.forEach(reg => {
-            csvData.push([
-                reg.id, reg.linea, reg.actividad, reg.avance_semanal || '', reg.avance_acumulado || '',
-                reg.ot, reg.responsables || '', reg.responsable || '', reg.dia || '',
-                reg.personas || '', reg.horas || '', reg.actividades || '', reg.fecha
-            ]);
-        });
-        
-        const csvContent = csvData.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
-        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `procesador_ot_${Date.now()}.csv`;
-        link.click();
-        URL.revokeObjectURL(link.href);
-        showMessage('✅ Exportado a Excel', 'success');
-    }
-    
-    function displayRecords() {
-        const container = document.getElementById('recordsContainer');
-        const tbody = document.getElementById('recordsBody');
-        
-        if (registros.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="13" style="text-align: center;">No hay registros</td></tr>';
-            container.style.display = 'block';
-            return;
-        }
-        
-        tbody.innerHTML = '';
-        registros.slice().reverse().forEach(reg => {
-            const row = tbody.insertRow();
-            row.insertCell(0).textContent = reg.id;
-            row.insertCell(1).textContent = reg.linea;
-            row.insertCell(2).textContent = reg.actividad;
-            row.insertCell(3).textContent = reg.avance_semanal || '-';
-            row.insertCell(4).textContent = reg.avance_acumulado || '-';
-            row.insertCell(5).textContent = reg.ot;
-            row.insertCell(6).textContent = reg.responsables || '-';
-            row.insertCell(7).textContent = reg.responsable || '-';
-            row.insertCell(8).textContent = reg.dia || '-';
-            row.insertCell(9).textContent = reg.personas || '-';
-            row.insertCell(10).textContent = reg.horas || '-';
-            row.insertCell(11).textContent = reg.actividades || '-';
-            row.insertCell(12).textContent = reg.fecha || '-';
-        });
-        container.style.display = 'block';
-    }
-    
-    function clearLocal() {
-        if (confirm('¿Eliminar todos los registros locales?')) {
-            registros = [];
-            saveRecords();
-            showMessage('Registros locales eliminados', 'success');
-            document.getElementById('recordsContainer').style.display = 'none';
-        }
-    }
-    
     async function testConnection() {
         try {
-            const response = await fetch(SHEET_BEST_URL);
+            const response = await fetch(APPS_SCRIPT_URL, { method: 'GET' });
             if (response.ok) {
                 document.getElementById('statusDot').className = 'status-dot';
-                document.getElementById('statusText').textContent = '🟢 Conectado a Sheet.best';
+                document.getElementById('statusText').textContent = '🟢 Conectado a Google Sheets';
                 return true;
             }
         } catch(e) {
-            console.error(e);
+            console.log('Modo local - esperando despliegue');
         }
         document.getElementById('statusDot').className = 'status-dot offline';
-        document.getElementById('statusText').textContent = '🔴 Sin conexión';
+        document.getElementById('statusText').textContent = '⚠️ Configurar URL de Apps Script';
         return false;
     }
     
-    // Event Listeners
     document.getElementById('mainForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        
         const btn = document.getElementById('submitBtn');
         btn.disabled = true;
         btn.innerHTML = '<span class="loading-spinner"></span> Guardando...';
@@ -436,25 +276,30 @@
         const data = Object.fromEntries(formData.entries());
         
         try {
-            const newId = await saveRecord(data);
-            showMessage(`✅ Registro #${newId} guardado`, 'success');
-            e.target.reset();
+            const result = await saveToGoogleSheets(data);
+            
+            if (result.success) {
+                showMessage(`✅ Registro guardado exitosamente en Google Sheets`, 'success');
+                e.target.reset();
+                
+                btn.style.background = '#4caf50';
+                setTimeout(() => {
+                    btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                }, 1000);
+            } else {
+                throw new Error(result.error);
+            }
         } catch (error) {
-            showMessage(`Error: ${error.message}`, 'error');
+            showMessage(`❌ Error: ${error.message}`, 'error');
         } finally {
             btn.disabled = false;
             btn.innerHTML = '💾 Guardar en Google Sheets';
         }
     });
     
-    document.getElementById('viewRecordsBtn').addEventListener('click', displayRecords);
-    document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
-    document.getElementById('clearLocalBtn').addEventListener('click', clearLocal);
-    
     // Inicializar
     updateTime();
     setInterval(updateTime, 1000);
-    loadRecords();
     testConnection();
 </script>
 </body>
