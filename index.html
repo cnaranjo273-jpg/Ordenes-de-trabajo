@@ -73,7 +73,7 @@
             text-transform: uppercase;
         }
         label.required::after { content: "*"; color: #f44336; margin-left: 4px; }
-        input, textarea {
+        input, textarea, select {
             padding: 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
@@ -81,7 +81,7 @@
             transition: all 0.3s;
             font-family: inherit;
         }
-        input:focus, textarea:focus {
+        input:focus, textarea:focus, select:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -124,14 +124,66 @@
             vertical-align: middle;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+        
+        /* Estilos para responsables múltiples */
+        .responsables-container {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+            background: #fafafa;
+        }
+        .responsable-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .responsable-item input {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        .btn-remove {
+            background: #dc3545;
+            padding: 8px 12px;
+            width: auto;
+            font-size: 12px;
+        }
+        .btn-add {
+            background: #28a745;
+            padding: 8px 12px;
+            width: auto;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .btn-add:hover, .btn-remove:hover {
+            transform: none;
+        }
+        
+        /* Campos calculados */
+        .calculated-field {
+            background: #f0f0f0;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .info-badge {
+            font-size: 11px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 768px) { 
+            .form-grid { grid-template-columns: 1fr; }
+            .responsable-item { flex-wrap: wrap; }
+            .btn-remove { width: 100%; }
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
         <h1>Sistema Procesador OT</h1>
-        <p>Guardado directo en Google Sheets</p>
+        <p>Guardado directo en Google Sheets - Con cálculo automático de Horas Hombre</p>
     </div>
     
     <div class="content">
@@ -159,12 +211,12 @@
                 
                 <div class="form-group">
                     <label>AVANCE SEMANAL [%]</label>
-                    <input type="text" name="avance_semanal" placeholder="Ej: 75">
+                    <input type="number" step="0.1" name="avance_semanal" placeholder="Ej: 75">
                 </div>
                 
                 <div class="form-group">
                     <label>AVANCE ACUMULADO [%]</label>
-                    <input type="text" name="avance_acumulado" placeholder="Ej: 60">
+                    <input type="number" step="0.1" name="avance_acumulado" placeholder="Ej: 60">
                 </div>
                 
                 <div class="form-group">
@@ -172,34 +224,48 @@
                     <input type="text" name="ot" placeholder="Número de OT" required>
                 </div>
                 
-                <div class="form-group">
-                    <label>RESPONSABLES</label>
-                    <input type="text" name="responsables" placeholder="Ej: CUSI SANTIAGO PATRICIO">
+                <div class="form-group full-width">
+                    <label>👥 RESPONSABLES (Múltiples)</label>
+                    <div class="responsables-container" id="responsablesContainer">
+                        <div class="responsable-item">
+                            <input type="text" name="responsables" placeholder="Nombre del responsable 1" style="flex: 1;">
+                            <button type="button" class="btn-remove" onclick="removeResponsable(this)" style="display: none;">❌</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-add" onclick="addResponsable()">+ Agregar otro responsable</button>
+                    <div class="info-badge">Puedes agregar todos los responsables necesarios</div>
                 </div>
                 
                 <div class="form-group">
-                    <label>RESPONSABLE</label>
-                    <input type="text" name="responsable" placeholder="Ej: DM">
+                    <label>RESPONSABLE PRINCIPAL</label>
+                    <input type="text" name="responsable_principal" placeholder="Nombre del responsable principal">
                 </div>
                 
                 <div class="form-group">
                     <label>DÍA</label>
-                    <input type="text" name="dia" placeholder="Ej: 1">
+                    <input type="text" name="dia" placeholder="Ej: lunes 1">
                 </div>
                 
                 <div class="form-group">
                     <label>NÚMERO DE PERSONAS</label>
-                    <input type="text" name="personas" placeholder="Ej: 1">
+                    <input type="number" name="personas" id="personas" value="1" min="1" step="1" placeholder="Ej: 2" onchange="calcularHorasHombre()" oninput="calcularHorasHombre()">
                 </div>
                 
                 <div class="form-group">
-                    <label>HORAS HOMBRE</label>
-                    <input type="text" name="horas" placeholder="Ej: 4">
+                    <label>HORAS TRABAJADAS</label>
+                    <input type="number" name="horas" id="horas" step="0.5" placeholder="Ej: 8" onchange="calcularHorasHombre()" oninput="calcularHorasHombre()">
+                    <div class="info-badge">Horas por persona por día</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>HORAS HOMBRE (Calculado)</label>
+                    <input type="text" name="horas_hombre" id="horasHombre" class="calculated-field" readonly placeholder="Se calcula automáticamente">
+                    <div class="info-badge">Horas Hombre = Horas × Número de Personas</div>
                 </div>
                 
                 <div class="form-group full-width">
-                    <label>ACTIVIDADES</label>
-                    <textarea name="actividades" placeholder="Descripción detallada..."></textarea>
+                    <label>ACTIVIDADES REALIZADAS</label>
+                    <textarea name="actividades" placeholder="Descripción detallada de las actividades realizadas..."></textarea>
                 </div>
             </div>
             
@@ -214,10 +280,7 @@
 
 <script>
     // 🔴 IMPORTANTE: REEMPLAZA ESTA URL CON LA QUE OBTUVIERAS AL DESPLEGAR
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmRZhqPlEn4Og3cXdels398Uic9aTD0JAKqjxbAxnRTQuREg_Im48XG75zT-NF5SAscg/exec"; // <-- Pega aquí tu URL
-    
-    // Variables
-    let registros = [];
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxxxxxx/exec"; // <-- Pega aquí tu URL
     
     function updateTime() {
         document.getElementById('currentTime').textContent = new Date().toLocaleTimeString('es-ES');
@@ -227,20 +290,88 @@
         const msg = document.getElementById('messageBox');
         msg.textContent = text;
         msg.className = `message ${type}`;
-        setTimeout(() => msg.style.display = 'none', 5000);
+        msg.style.display = 'block';
+        setTimeout(() => {
+            msg.style.display = 'none';
+            msg.className = 'message';
+        }, 5000);
     }
     
+    // Función para calcular Horas Hombre automáticamente
+    function calcularHorasHombre() {
+        const personas = parseFloat(document.getElementById('personas').value) || 0;
+        const horas = parseFloat(document.getElementById('horas').value) || 0;
+        const horasHombre = personas * horas;
+        
+        document.getElementById('horasHombre').value = horasHombre > 0 ? horasHombre : '';
+        
+        // Mostrar fórmula en consola para debugging
+        console.log(`Cálculo: ${personas} personas × ${horas} horas = ${horasHombre} horas hombre`);
+    }
+    
+    // Función para agregar un nuevo campo de responsable
+    function addResponsable() {
+        const container = document.getElementById('responsablesContainer');
+        const items = container.getElementsByClassName('responsable-item');
+        const newIndex = items.length + 1;
+        
+        const newItem = document.createElement('div');
+        newItem.className = 'responsable-item';
+        newItem.innerHTML = `
+            <input type="text" name="responsables" placeholder="Nombre del responsable ${newIndex}" style="flex: 1;">
+            <button type="button" class="btn-remove" onclick="removeResponsable(this)">❌</button>
+        `;
+        container.appendChild(newItem);
+        
+        // Mostrar botones de eliminar en todos los items
+        Array.from(container.getElementsByClassName('btn-remove')).forEach(btn => {
+            btn.style.display = 'inline-block';
+        });
+    }
+    
+    // Función para eliminar un campo de responsable
+    function removeResponsable(button) {
+        const item = button.parentElement;
+        item.remove();
+        
+        const container = document.getElementById('responsablesContainer');
+        const items = container.getElementsByClassName('responsable-item');
+        
+        // Si solo queda uno, ocultar su botón de eliminar
+        if (items.length === 1) {
+            const remainingBtn = items[0].querySelector('.btn-remove');
+            if (remainingBtn) remainingBtn.style.display = 'none';
+        }
+        
+        // Renumerar los placeholders
+        Array.from(items).forEach((item, idx) => {
+            const input = item.querySelector('input');
+            if (input) {
+                input.placeholder = `Nombre del responsable ${idx + 1}`;
+            }
+        });
+    }
+    
+    // Función para obtener todos los responsables como texto
+    function getResponsablesTexto() {
+        const inputs = document.querySelectorAll('input[name="responsables"]');
+        const responsables = Array.from(inputs)
+            .map(input => input.value.trim())
+            .filter(nombre => nombre !== '');
+        
+        return responsables.join('; ');
+    }
+    
+    // Guardar en Google Sheets via Apps Script
     async function saveToGoogleSheets(data) {
         try {
             const response = await fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Necesario para Apps Script
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
             
-            // Con no-cors no podemos leer la respuesta directamente
-            // Pero si no hay error, asumimos éxito
             return { success: true };
             
         } catch (error) {
@@ -249,6 +380,7 @@
         }
     }
     
+    // Probar conexión
     async function testConnection() {
         try {
             const response = await fetch(APPS_SCRIPT_URL, { method: 'GET' });
@@ -258,13 +390,14 @@
                 return true;
             }
         } catch(e) {
-            console.log('Modo local - esperando despliegue');
+            console.log('Esperando despliegue...');
         }
         document.getElementById('statusDot').className = 'status-dot offline';
         document.getElementById('statusText').textContent = 'Configurar URL de Apps Script';
         return false;
     }
     
+    // Evento del formulario
     document.getElementById('mainForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -272,8 +405,28 @@
         btn.disabled = true;
         btn.innerHTML = '<span class="loading-spinner"></span> Guardando...';
         
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData.entries());
+        // Obtener valores del formulario
+        const personas = document.getElementById('personas').value;
+        const horas = document.getElementById('horas').value;
+        const horasHombre = document.getElementById('horasHombre').value;
+        
+        // Preparar datos para enviar
+        const data = {
+            linea: document.querySelector('input[name="linea"]').value,
+            actividad: document.querySelector('input[name="actividad"]').value,
+            avance_semanal: document.querySelector('input[name="avance_semanal"]').value || '',
+            avance_acumulado: document.querySelector('input[name="avance_acumulado"]').value || '',
+            ot: document.querySelector('input[name="ot"]').value,
+            responsables: getResponsablesTexto(), // Todos los responsables concatenados
+            responsable_principal: document.querySelector('input[name="responsable_principal"]').value || '',
+            dia: document.querySelector('input[name="dia"]').value || '',
+            numero_personas: personas || '',
+            horas_trabajadas: horas || '',
+            horas_hombre: horasHombre || '',
+            actividades: document.querySelector('textarea[name="actividades"]').value || ''
+        };
+        
+        console.log('Datos a enviar:', data);
         
         try {
             const result = await saveToGoogleSheets(data);
@@ -281,6 +434,20 @@
             if (result.success) {
                 showMessage(`Registro guardado exitosamente en Google Sheets`, 'success');
                 e.target.reset();
+                
+                // Resetear campos específicos
+                document.getElementById('personas').value = '1';
+                document.getElementById('horas').value = '';
+                document.getElementById('horasHombre').value = '';
+                
+                // Limpiar responsables adicionales
+                const container = document.getElementById('responsablesContainer');
+                while (container.children.length > 1) {
+                    container.removeChild(container.lastChild);
+                }
+                // Limpiar el primer responsable
+                const firstInput = container.querySelector('input');
+                if (firstInput) firstInput.value = '';
                 
                 btn.style.background = '#4caf50';
                 setTimeout(() => {
@@ -290,7 +457,7 @@
                 throw new Error(result.error);
             }
         } catch (error) {
-            showMessage(`❌ Error: ${error.message}`, 'error');
+            showMessage(`Error: ${error.message}`, 'error');
         } finally {
             btn.disabled = false;
             btn.innerHTML = 'Guardar en Google Sheets';
@@ -301,6 +468,16 @@
     updateTime();
     setInterval(updateTime, 1000);
     testConnection();
+    
+    // Agregar event listeners para cálculo automático
+    document.getElementById('personas').addEventListener('input', calcularHorasHombre);
+    document.getElementById('horas').addEventListener('input', calcularHorasHombre);
+    
+    // Ocultar botón de eliminar del primer responsable
+    setTimeout(() => {
+        const firstRemoveBtn = document.querySelector('.responsable-item .btn-remove');
+        if (firstRemoveBtn) firstRemoveBtn.style.display = 'none';
+    }, 100);
 </script>
 </body>
 </html>
