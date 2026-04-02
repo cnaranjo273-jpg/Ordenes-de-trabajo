@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Procesador OT - Con Google Sheets</title>
+    <title>Sistema Procesador OT - Google Sheets</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -45,9 +45,10 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #4caf50;
-            animation: pulse 2s infinite;
+            background: #ffc107; /* Amarillo mientras verifica */
+            animation: pulse 1.5s infinite;
         }
+        .status-dot.online { background: #4caf50; animation: pulse 2s infinite; }
         .status-dot.offline { background: #f44336; animation: none; }
         @keyframes pulse {
             0% { opacity: 1; transform: scale(1); }
@@ -159,13 +160,6 @@
             transform: none;
         }
         
-        /* Campos calculados */
-        .calculated-field {
-            background: #f0f0f0;
-            color: #667eea;
-            font-weight: bold;
-        }
-        
         .info-badge {
             font-size: 11px;
             color: #666;
@@ -182,8 +176,8 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>Sistema Procesador OT</h1>
-        <p>Guardado directo en Google Sheets - Con cálculo automático de Horas Hombre</p>
+        <h1>📊 Sistema Procesador OT</h1>
+        <p>Guardado directo en Google Sheets</p>
     </div>
     
     <div class="content">
@@ -193,34 +187,34 @@
                 <span id="statusText">Verificando conexión...</span>
             </div>
             <div class="stats">
-                <div>Hora: <span id="currentTime">-</span></div>
+                <div>🕐 Hora: <span id="currentTime">-</span></div>
             </div>
         </div>
         
         <form id="mainForm">
             <div class="form-grid">
                 <div class="form-group full-width">
-                    <label class="required">LÍNEA/SUBESTACIÓN</label>
+                    <label class="required">📍 LÍNEA/SUBESTACIÓN</label>
                     <input type="text" name="linea" placeholder="Ej: S/E (26) ALANGASI" required>
                 </div>
                 
                 <div class="form-group full-width">
-                    <label class="required">ACTIVIDAD</label>
+                    <label class="required">⚙️ ACTIVIDAD</label>
                     <input type="text" name="actividad" placeholder="Ej: MANTENIMIENTO PREVENTIVO" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>AVANCE SEMANAL [%]</label>
+                    <label>📈 AVANCE SEMANAL [%]</label>
                     <input type="number" step="0.1" name="avance_semanal" placeholder="Ej: 75">
                 </div>
                 
                 <div class="form-group">
-                    <label>AVANCE ACUMULADO [%]</label>
+                    <label>📊 AVANCE ACUMULADO [%]</label>
                     <input type="number" step="0.1" name="avance_acumulado" placeholder="Ej: 60">
                 </div>
                 
                 <div class="form-group">
-                    <label class="required">OT</label>
+                    <label class="required">🔖 OT</label>
                     <input type="text" name="ot" placeholder="Número de OT" required>
                 </div>
                 
@@ -233,44 +227,38 @@
                         </div>
                     </div>
                     <button type="button" class="btn-add" onclick="addResponsable()">+ Agregar otro responsable</button>
-                    <div class="info-badge">Puedes agregar todos los responsables necesarios</div>
+                    <div class="info-badge">💡 Puedes agregar todos los responsables necesarios</div>
                 </div>
                 
                 <div class="form-group">
-                    <label>RESPONSABLE PRINCIPAL</label>
+                    <label>👤 RESPONSABLE PRINCIPAL</label>
                     <input type="text" name="responsable_principal" placeholder="Nombre del responsable principal">
                 </div>
                 
                 <div class="form-group">
-                    <label>DÍA</label>
+                    <label>📅 DÍA</label>
                     <input type="text" name="dia" placeholder="Ej: lunes 1">
                 </div>
                 
                 <div class="form-group">
-                    <label>NÚMERO DE PERSONAS</label>
-                    <input type="number" name="personas" id="personas" value="1" min="1" step="1" placeholder="Ej: 2" onchange="calcularHorasHombre()" oninput="calcularHorasHombre()">
+                    <label>👷 NÚMERO DE PERSONAS</label>
+                    <input type="number" name="numero_personas" id="numero_personas" value="1" min="1" step="1" placeholder="Ej: 2">
                 </div>
                 
                 <div class="form-group">
-                    <label>HORAS TRABAJADAS</label>
-                    <input type="number" name="horas" id="horas" step="0.5" placeholder="Ej: 8" onchange="calcularHorasHombre()" oninput="calcularHorasHombre()">
-                    <div class="info-badge">Horas por persona por día</div>
-                </div>
-                
-                <div class="form-group">
-                    <label>HORAS HOMBRE (Calculado)</label>
-                    <input type="text" name="horas_hombre" id="horasHombre" class="calculated-field" readonly placeholder="Se calcula automáticamente">
-                    <div class="info-badge">Horas Hombre = Horas × Número de Personas</div>
+                    <label>⏱️ HORAS TRABAJADAS</label>
+                    <input type="number" name="horas_trabajadas" id="horas_trabajadas" step="0.5" placeholder="Ej: 8">
+                    <div class="info-badge">⏰ Horas por persona por día</div>
                 </div>
                 
                 <div class="form-group full-width">
-                    <label>ACTIVIDADES REALIZADAS</label>
+                    <label>📝 ACTIVIDADES REALIZADAS</label>
                     <textarea name="actividades" placeholder="Descripción detallada de las actividades realizadas..."></textarea>
                 </div>
             </div>
             
             <button type="submit" id="submitBtn">
-                Guardar en Google Sheets
+                💾 Guardar en Google Sheets
             </button>
         </form>
         
@@ -279,13 +267,15 @@
 </div>
 
 <script>
-    // 🔴 IMPORTANTE: REEMPLAZA ESTA URL CON LA QUE OBTUVIERAS AL DESPLEGAR
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmRZhqPlEn4Og3cXdels398Uic9aTD0JAKqjxbAxnRTQuREg_Im48XG75zT-NF5SAscg/exec; // <-- Pega aquí tu URL
+    // 🔴 TU URL DE GOOGLE APPS SCRIPT - ¡YA CONFIGURADA!
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmRZhqPlEn4Og3cXdels398Uic9aTD0JAKqjxbAxnRTQuREg_Im48XG75zT-NF5SAscg/exec";
     
+    // Función para actualizar la hora
     function updateTime() {
         document.getElementById('currentTime').textContent = new Date().toLocaleTimeString('es-ES');
     }
     
+    // Mostrar mensajes al usuario
     function showMessage(text, type) {
         const msg = document.getElementById('messageBox');
         msg.textContent = text;
@@ -297,19 +287,7 @@
         }, 5000);
     }
     
-    // Función para calcular Horas Hombre automáticamente
-    function calcularHorasHombre() {
-        const personas = parseFloat(document.getElementById('personas').value) || 0;
-        const horas = parseFloat(document.getElementById('horas').value) || 0;
-        const horasHombre = personas * horas;
-        
-        document.getElementById('horasHombre').value = horasHombre > 0 ? horasHombre : '';
-        
-        // Mostrar fórmula en consola para debugging
-        console.log(`Cálculo: ${personas} personas × ${horas} horas = ${horasHombre} horas hombre`);
-    }
-    
-    // Función para agregar un nuevo campo de responsable
+    // ================= MÚLTIPLES RESPONSABLES =================
     function addResponsable() {
         const container = document.getElementById('responsablesContainer');
         const items = container.getElementsByClassName('responsable-item');
@@ -329,7 +307,6 @@
         });
     }
     
-    // Función para eliminar un campo de responsable
     function removeResponsable(button) {
         const item = button.parentElement;
         item.remove();
@@ -337,67 +314,88 @@
         const container = document.getElementById('responsablesContainer');
         const items = container.getElementsByClassName('responsable-item');
         
-        // Si solo queda uno, ocultar su botón de eliminar
         if (items.length === 1) {
             const remainingBtn = items[0].querySelector('.btn-remove');
             if (remainingBtn) remainingBtn.style.display = 'none';
         }
         
-        // Renumerar los placeholders
         Array.from(items).forEach((item, idx) => {
             const input = item.querySelector('input');
-            if (input) {
-                input.placeholder = `Nombre del responsable ${idx + 1}`;
-            }
+            if (input) input.placeholder = `Nombre del responsable ${idx + 1}`;
         });
     }
     
-    // Función para obtener todos los responsables como texto
     function getResponsablesTexto() {
         const inputs = document.querySelectorAll('input[name="responsables"]');
         const responsables = Array.from(inputs)
             .map(input => input.value.trim())
             .filter(nombre => nombre !== '');
-        
         return responsables.join('; ');
     }
     
-    // Guardar en Google Sheets via Apps Script
+    // ================= GUARDADO EN GOOGLE SHEETS =================
     async function saveToGoogleSheets(data) {
         try {
+            // Usamos POST normal (no 'no-cors' para poder leer la respuesta)
             const response = await fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors',
+                mode: 'cors', // Importante para leer la respuesta
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
             
-            return { success: true };
-            
+            if (response.ok) {
+                const result = await response.json();
+                return { success: true, message: result.message };
+            } else {
+                const errorText = await response.text();
+                return { success: false, error: `Error ${response.status}: ${errorText}` };
+            }
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error de red:', error);
             return { success: false, error: error.message };
         }
     }
     
-    // Probar conexión
+    // ================= VERIFICACIÓN DE CONEXIÓN RÁPIDA =================
+    // Esta función es CLAVE para que no se demore
     async function testConnection() {
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        
+        // Estado: verificando
+        statusDot.className = 'status-dot';
+        statusText.textContent = 'Verificando conexión...';
+        
         try {
-            const response = await fetch(APPS_SCRIPT_URL, { method: 'GET' });
+            // Timeout de 5 segundos para no quedarnos esperando
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            const response = await fetch(APPS_SCRIPT_URL, {
+                method: 'GET',
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
             if (response.ok) {
-                document.getElementById('statusDot').className = 'status-dot';
-                document.getElementById('statusText').textContent = '🟢 Conectado a Google Sheets';
+                statusDot.className = 'status-dot online';
+                statusText.textContent = '🟢 Conectado a Google Sheets';
+                console.log('✅ Conexión exitosa');
                 return true;
+            } else {
+                throw new Error(`HTTP ${response.status}`);
             }
-        } catch(e) {
-            console.log('Esperando despliegue...');
+        } catch (error) {
+            console.warn('⚠️ Error de conexión:', error.message);
+            statusDot.className = 'status-dot offline';
+            statusText.textContent = '⚠️ Sin conexión (modo local)';
+            return false;
         }
-        document.getElementById('statusDot').className = 'status-dot offline';
-        document.getElementById('statusText').textContent = 'Configurar URL de Apps Script';
-        return false;
     }
     
-    // Evento del formulario
+    // ================= MANEJAR ENVÍO DEL FORMULARIO =================
     document.getElementById('mainForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -405,75 +403,70 @@
         btn.disabled = true;
         btn.innerHTML = '<span class="loading-spinner"></span> Guardando...';
         
-        // Obtener valores del formulario
-        const personas = document.getElementById('personas').value;
-        const horas = document.getElementById('horas').value;
-        const horasHombre = document.getElementById('horasHombre').value;
-        
-        // Preparar datos para enviar
+        // Recopilar datos del formulario
         const data = {
             linea: document.querySelector('input[name="linea"]').value,
             actividad: document.querySelector('input[name="actividad"]').value,
             avance_semanal: document.querySelector('input[name="avance_semanal"]').value || '',
             avance_acumulado: document.querySelector('input[name="avance_acumulado"]').value || '',
             ot: document.querySelector('input[name="ot"]').value,
-            responsables: getResponsablesTexto(), // Todos los responsables concatenados
+            responsables: getResponsablesTexto(),
             responsable_principal: document.querySelector('input[name="responsable_principal"]').value || '',
             dia: document.querySelector('input[name="dia"]').value || '',
-            numero_personas: personas || '',
-            horas_trabajadas: horas || '',
-            horas_hombre: horasHombre || '',
+            numero_personas: document.getElementById('numero_personas').value || '',
+            horas_trabajadas: document.getElementById('horas_trabajadas').value || '',
             actividades: document.querySelector('textarea[name="actividades"]').value || ''
         };
         
-        console.log('Datos a enviar:', data);
+        console.log('📤 Enviando datos:', data);
         
         try {
             const result = await saveToGoogleSheets(data);
             
             if (result.success) {
-                showMessage(`Registro guardado exitosamente en Google Sheets`, 'success');
+                showMessage(`✅ ¡Registro guardado exitosamente en Google Sheets!`, 'success');
                 e.target.reset();
                 
-                // Resetear campos específicos
-                document.getElementById('personas').value = '1';
-                document.getElementById('horas').value = '';
-                document.getElementById('horasHombre').value = '';
+                // Resetear valores por defecto
+                document.getElementById('numero_personas').value = '1';
+                document.getElementById('horas_trabajadas').value = '';
                 
                 // Limpiar responsables adicionales
                 const container = document.getElementById('responsablesContainer');
                 while (container.children.length > 1) {
                     container.removeChild(container.lastChild);
                 }
-                // Limpiar el primer responsable
                 const firstInput = container.querySelector('input');
                 if (firstInput) firstInput.value = '';
                 
+                // Animación de éxito
                 btn.style.background = '#4caf50';
                 setTimeout(() => {
                     btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
                 }, 1000);
             } else {
-                throw new Error(result.error);
+                throw new Error(result.error || 'Error desconocido');
             }
         } catch (error) {
-            showMessage(`Error: ${error.message}`, 'error');
+            console.error('❌ Error:', error);
+            showMessage(`❌ Error al guardar: ${error.message}`, 'error');
         } finally {
             btn.disabled = false;
-            btn.innerHTML = 'Guardar en Google Sheets';
+            btn.innerHTML = '💾 Guardar en Google Sheets';
         }
     });
     
-    // Inicializar
+    // ================= INICIALIZACIÓN =================
     updateTime();
     setInterval(updateTime, 1000);
+    
+    // Verificar conexión al cargar (rápido, con timeout)
     testConnection();
     
-    // Agregar event listeners para cálculo automático
-    document.getElementById('personas').addEventListener('input', calcularHorasHombre);
-    document.getElementById('horas').addEventListener('input', calcularHorasHombre);
+    // Verificar cada 60 segundos (no tan seguido para no saturar)
+    setInterval(testConnection, 60000);
     
-    // Ocultar botón de eliminar del primer responsable
+    // Ocultar botón eliminar del primer responsable
     setTimeout(() => {
         const firstRemoveBtn = document.querySelector('.responsable-item .btn-remove');
         if (firstRemoveBtn) firstRemoveBtn.style.display = 'none';
