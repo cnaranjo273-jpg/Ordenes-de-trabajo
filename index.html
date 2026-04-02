@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Procesador OT - Gestión de Órdenes de Trabajo</title>
+    <title>Sistema Procesador OT - Conectado a Google Sheets</title>
     <style>
         * {
             margin: 0;
@@ -272,13 +272,38 @@
             background: #f8f9fa;
         }
 
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-group button {
+            flex: 1;
+        }
+
         .btn-excel {
             background: #28a745;
-            margin-top: 10px;
         }
 
         .btn-excel:hover {
             background: #218838;
+        }
+
+        .btn-sync {
+            background: #17a2b8;
+        }
+
+        .btn-sync:hover {
+            background: #138496;
+        }
+
+        .btn-clear {
+            background: #dc3545;
+        }
+
+        .btn-clear:hover {
+            background: #c82333;
         }
 
         @media (max-width: 768px) {
@@ -299,100 +324,105 @@
                 width: 100%;
                 justify-content: space-between;
             }
+            
+            .btn-group {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>📊 Sistema Procesador OT</h1>
-        <p>Gestión de Órdenes de Trabajo y Actividades</p>
+        <h1>Sistema Procesador OT</h1>
+        <p>Gestión de Órdenes de Trabajo - Conectado a Google Sheets vía Sheet.best</p>
     </div>
     
     <div class="content">
         <div class="status-bar">
             <div class="status-indicator">
                 <div class="status-dot" id="statusDot"></div>
-                <span id="statusText">Listo para usar</span>
+                <span id="statusText">Verificando conexión...</span>
             </div>
             <div class="stats">
-                <div>📝 Total Registros: <span id="totalRecords">0</span></div>
-                <div>🕐 Hora: <span id="currentTime">-</span></div>
+                <div>Total Registros: <span id="totalRecords">0</span></div>
+                <div>Último No.: <span id="lastRecord">-</span></div>
+                <div>Hora: <span id="currentTime">-</span></div>
             </div>
         </div>
         
         <form id="mainForm">
             <div class="form-grid">
                 <div class="form-group full-width">
-                    <label class="required">📌 LÍNEA</label>
-                    <input type="text" name="linea" placeholder="Ej: Línea de Producción 1" required>
+                    <label class="required">LÍNEA/SUBESTACIÓN</label>
+                    <input type="text" name="LÍNEA/SUBESTACIÓN" placeholder="Ej: S/E (03) Barrio Nuevo" required>
                 </div>
                 
                 <div class="form-group full-width">
-                    <label class="required">⚙️ ACTIVIDAD</label>
-                    <input type="text" name="actividad" placeholder="Descripción de la actividad" required>
+                    <label class="required">ACTIVIDAD</label>
+                    <input type="text" name="ACTIVIDAD" placeholder="Ej: Mantenimiento Preventivo" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>📈 AVANCE SEMANAL</label>
-                    <input type="text" name="avance_semanal" placeholder="Ej: 75%">
+                    <label>AVANCE SEMANAL [%]</label>
+                    <input type="text" name="AVANCE SEMANAL [%]" placeholder="Ej: 75.5">
                 </div>
                 
                 <div class="form-group">
-                    <label>📊 AVANCE ACUMULADO</label>
-                    <input type="text" name="avance_acumulado" placeholder="Ej: 60%">
+                    <label>AVANCE ACUMULADO [%]</label>
+                    <input type="text" name="AVANCE ACUMULADO [%]" placeholder="Ej: 60.2">
                 </div>
                 
                 <div class="form-group">
-                    <label class="required">🔖 N° OT</label>
-                    <input type="text" name="ot" placeholder="Número de OT" required>
+                    <label class="required">OT</label>
+                    <input type="text" name="OT" placeholder="Número de OT" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>📅 DÍA</label>
-                    <input type="text" name="dia" placeholder="Fecha o día de la semana">
+                    <label>RESPONSABLES</label>
+                    <input type="text" name="RESPONSABLES" placeholder="Nombres de responsables">
                 </div>
                 
                 <div class="form-group">
-                    <label>👥 RESPONSABLES</label>
-                    <input type="text" name="responsables" placeholder="Nombres de responsables">
+                    <label>RESPONSABLE</label>
+                    <input type="text" name="RESPONSABLE" placeholder="Nombre del responsable principal">
                 </div>
                 
                 <div class="form-group">
-                    <label>👤 RESPONSABLE PRINCIPAL</label>
-                    <input type="text" name="responsable" placeholder="Nombre del responsable principal">
+                    <label>DÍA</label>
+                    <input type="text" name="DÍA" placeholder="Ej: lunes - viernes">
                 </div>
                 
                 <div class="form-group">
-                    <label>👷 PERSONAS</label>
-                    <input type="number" name="personas" placeholder="Cantidad de personas">
+                    <label>NÚMERO DE PERSONAS</label>
+                    <input type="text" name="NUMERO DE PERSONAS" placeholder="Cantidad de personas">
                 </div>
                 
                 <div class="form-group">
-                    <label>⏱️ HORAS</label>
-                    <input type="number" step="0.5" name="horas" placeholder="Horas trabajadas">
+                    <label>HORAS HOMBRE</label>
+                    <input type="text" name="HORAS HOMBRE" placeholder="Horas hombre">
                 </div>
                 
                 <div class="form-group full-width">
-                    <label>📝 ACTIVIDADES DETALLADAS</label>
-                    <textarea name="actividades" placeholder="Descripción detallada de las actividades realizadas..."></textarea>
+                    <label>ACTIVIDADES</label>
+                    <textarea name="ACTIVIDADES" placeholder="Descripción detallada de las actividades realizadas..."></textarea>
                 </div>
             </div>
             
             <button type="submit" id="submitBtn">
-                💾 Guardar Registro
+                Guardar en Google Sheets
             </button>
         </form>
         
-        <div style="margin-top: 20px; display: flex; gap: 10px;">
-            <button type="button" id="viewRecordsBtn" style="background: #17a2b8;">
-                📋 Ver Registros Guardados
+        <div class="btn-group">
+            <button type="button" id="viewRecordsBtn" class="btn-sync">
+                Ver Registros
             </button>
             <button type="button" id="exportExcelBtn" class="btn-excel">
-                📊 Exportar a Excel
+                Exportar a Excel
             </button>
-            <button type="button" id="clearAllBtn" style="background: #dc3545;">
-                🗑️ Limpiar Todos los Registros
+            <button type="button" id="clearLocalBtn" class="btn-clear">
+                Limpiar Local
             </button>
         </div>
         
@@ -401,19 +431,19 @@
                 <table id="recordsTable">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Línea</th>
-                            <th>Actividad</th>
-                            <th>Avance Semanal</th>
-                            <th>Avance Acumulado</th>
+                            <th>No.</th>
+                            <th>LÍNEA/SUBESTACIÓN</th>
+                            <th>ACTIVIDAD</th>
+                            <th>AVANCE SEMANAL [%]</th>
+                            <th>AVANCE ACUMULADO [%]</th>
                             <th>OT</th>
-                            <th>Responsables</th>
-                            <th>Responsable</th>
-                            <th>Día</th>
-                            <th>Personas</th>
-                            <th>Horas</th>
-                            <th>Actividades</th>
-                            <th>Fecha</th>
+                            <th>RESPONSABLES</th>
+                            <th>RESPONSABLE</th>
+                            <th>DÍA</th>
+                            <th>NUMERO DE PERSONAS</th>
+                            <th>HORAS HOMBRE</th>
+                            <th>ACTIVIDADES</th>
+                            <th>FECHA REGISTRO</th>
                         </tr>
                     </thead>
                     <tbody id="recordsBody"></tbody>
@@ -426,10 +456,13 @@
 </div>
 
 <script>
+    // Configuración de Sheet.best (¡YA CONFIGURADO CON TU ENDPOINT!)
+    const SHEET_BEST_URL = "https://api.sheetbest.com/sheets/63d8bf52-79fb-4d2e-9426-eff064fb1112";
+    
     // Variables globales
     let registros = [];
     
-    // Cargar registros del localStorage al iniciar
+    // Cargar registros del localStorage
     function loadRecords() {
         const saved = localStorage.getItem('procesadorOT_registros');
         if (saved) {
@@ -449,6 +482,9 @@
     // Actualizar estadísticas
     function updateStats() {
         document.getElementById('totalRecords').textContent = registros.length;
+        if (registros.length > 0) {
+            document.getElementById('lastRecord').textContent = registros[registros.length - 1].no;
+        }
     }
     
     // Actualizar hora actual
@@ -469,6 +505,142 @@
         }, 5000);
     }
     
+    // Guardar en Google Sheets via Sheet.best
+    async function saveToSheetBest(data) {
+        try {
+            const response = await fetch(SHEET_BEST_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify([data]) // Sheet.best espera un array
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Respuesta Sheet.best:', result);
+                return { success: true, message: 'Guardado en Google Sheets' };
+            } else {
+                const error = await response.text();
+                console.error('Error Sheet.best:', error);
+                return { success: false, error: `Error ${response.status}: ${error}` };
+            }
+        } catch (error) {
+            console.error('Error de red:', error);
+            return { success: false, error: error.message };
+        }
+    }
+    
+    // Guardar nuevo registro
+    async function saveRecord(data) {
+        const newNo = registros.length + 1;
+        const now = new Date();
+        const fechaStr = now.toLocaleString('es-ES');
+        
+        // Crear objeto con los nombres de columna exactos que tiene tu hoja
+        const nuevoRegistro = {
+            "No.": newNo,
+            "LÍNEA/SUBESTACIÓN": data["LÍNEA/SUBESTACIÓN"],
+            "ACTIVIDAD": data["ACTIVIDAD"],
+            "AVANCE SEMANAL [%]": data["AVANCE SEMANAL [%]"] || "",
+            "AVANCE ACUMULADO [%]": data["AVANCE ACUMULADO [%]"] || "",
+            "OT": data["OT"],
+            "RESPONSABLES": data["RESPONSABLES"] || "",
+            "RESPONSABLE": data["RESPONSABLE"] || "",
+            "DÍA": data["DÍA"] || "",
+            "NUMERO DE PERSONAS": data["NUMERO DE PERSONAS"] || "",
+            "HORAS HOMBRE": data["HORAS HOMBRE"] || "",
+            "ACTIVIDADES": data["ACTIVIDADES"] || "",
+            "FECHA_REGISTRO": fechaStr,
+            "timestamp": now.toISOString()
+        };
+        
+        // También guardamos una copia local para mostrar en la tabla
+        const registroLocal = {
+            no: newNo,
+            linea: data["LÍNEA/SUBESTACIÓN"],
+            actividad: data["ACTIVIDAD"],
+            avance_semanal: data["AVANCE SEMANAL [%]"] || "",
+            avance_acumulado: data["AVANCE ACUMULADO [%]"] || "",
+            ot: data["OT"],
+            responsables: data["RESPONSABLES"] || "",
+            responsable: data["RESPONSABLE"] || "",
+            dia: data["DÍA"] || "",
+            numero_personas: data["NUMERO DE PERSONAS"] || "",
+            horas_hombre: data["HORAS HOMBRE"] || "",
+            actividades: data["ACTIVIDADES"] || "",
+            fecha_registro: fechaStr
+        };
+        
+        // Guardar localmente
+        registros.push(registroLocal);
+        saveRecords();
+        
+        // Guardar en Sheet.best
+        try {
+            const result = await saveToSheetBest(nuevoRegistro);
+            if (result.success) {
+                showMessage(`Registro #${newNo} guardado en Google Sheets y localmente`, 'success');
+            } else {
+                showMessage(`Registro #${newNo} guardado solo localmente. Error en Sheet.best: ${result.error}`, 'info');
+            }
+        } catch (error) {
+            showMessage(`Registro #${newNo} guardado localmente. No se pudo conectar con Sheet.best.`, 'info');
+        }
+        
+        return newNo;
+    }
+    
+    // Exportar a Excel (CSV)
+    function exportToExcel() {
+        if (registros.length === 0) {
+            showMessage('No hay registros para exportar', 'error');
+            return;
+        }
+        
+        const headers = [
+            'No.', 'LÍNEA/SUBESTACIÓN', 'ACTIVIDAD', 'AVANCE SEMANAL [%]', 
+            'AVANCE ACUMULADO [%]', 'OT', 'RESPONSABLES', 'RESPONSABLE', 
+            'DÍA', 'NUMERO DE PERSONAS', 'HORAS HOMBRE', 'ACTIVIDADES', 'FECHA REGISTRO'
+        ];
+        
+        const csvData = [headers];
+        
+        registros.forEach(reg => {
+            csvData.push([
+                reg.no,
+                reg.linea,
+                reg.actividad,
+                reg.avance_semanal,
+                reg.avance_acumulado,
+                reg.ot,
+                reg.responsables,
+                reg.responsable,
+                reg.dia,
+                reg.numero_personas,
+                reg.horas_hombre,
+                reg.actividades,
+                reg.fecha_registro
+            ]);
+        });
+        
+        const csvContent = csvData.map(row => 
+            row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+        ).join('\n');
+        
+        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.setAttribute('download', `procesador_ot_${new Date().toISOString().slice(0,19)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        showMessage('Registros exportados a Excel exitosamente', 'success');
+    }
+    
     // Mostrar todos los registros
     function displayRecords() {
         const container = document.getElementById('recordsContainer');
@@ -481,9 +653,9 @@
         }
         
         tbody.innerHTML = '';
-        registros.forEach(reg => {
+        registros.slice().reverse().forEach(reg => {
             const row = tbody.insertRow();
-            row.insertCell(0).textContent = reg.id;
+            row.insertCell(0).textContent = reg.no;
             row.insertCell(1).textContent = reg.linea;
             row.insertCell(2).textContent = reg.actividad;
             row.insertCell(3).textContent = reg.avance_semanal || '-';
@@ -492,106 +664,45 @@
             row.insertCell(6).textContent = reg.responsables || '-';
             row.insertCell(7).textContent = reg.responsable || '-';
             row.insertCell(8).textContent = reg.dia || '-';
-            row.insertCell(9).textContent = reg.personas || '-';
-            row.insertCell(10).textContent = reg.horas || '-';
+            row.insertCell(9).textContent = reg.numero_personas || '-';
+            row.insertCell(10).textContent = reg.horas_hombre || '-';
             row.insertCell(11).textContent = reg.actividades || '-';
-            row.insertCell(12).textContent = reg.fecha || '-';
+            row.insertCell(12).textContent = reg.fecha_registro || '-';
         });
         
         container.style.display = 'block';
     }
     
-    // Exportar a Excel (CSV)
-    function exportToExcel() {
-        if (registros.length === 0) {
-            showMessage('No hay registros para exportar', 'error');
-            return;
-        }
-        
-        // Preparar datos para CSV
-        const headers = ['ID', 'Línea', 'Actividad', 'Avance Semanal', 'Avance Acumulado', 
-                        'OT', 'Responsables', 'Responsable Principal', 'Día', 'Personas', 
-                        'Horas', 'Actividades Detalladas', 'Fecha Registro'];
-        
-        const csvData = [headers];
-        
-        registros.forEach(reg => {
-            csvData.push([
-                reg.id,
-                reg.linea,
-                reg.actividad,
-                reg.avance_semanal || '',
-                reg.avance_acumulado || '',
-                reg.ot,
-                reg.responsables || '',
-                reg.responsable || '',
-                reg.dia || '',
-                reg.personas || '',
-                reg.horas || '',
-                reg.actividades || '',
-                reg.fecha || ''
-            ]);
-        });
-        
-        // Convertir a CSV
-        const csvContent = csvData.map(row => 
-            row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-        ).join('\n');
-        
-        // Descargar archivo
-        const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.href = url;
-        link.setAttribute('download', `procesador_ot_${new Date().toISOString().slice(0,19)}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        
-        showMessage('✅ Registros exportados exitosamente', 'success');
-    }
-    
-    // Limpiar todos los registros
-    function clearAllRecords() {
-        if (confirm('¿Estás seguro de que deseas eliminar TODOS los registros? Esta acción no se puede deshacer.')) {
+    // Limpiar registros locales
+    function clearLocalRecords() {
+        if (confirm('¿Estás seguro de que deseas eliminar TODOS los registros locales? Esto no afecta a Google Sheets.')) {
             registros = [];
             saveRecords();
-            showMessage('✅ Todos los registros han sido eliminados', 'success');
+            showMessage('Todos los registros locales han sido eliminados', 'success');
             document.getElementById('recordsContainer').style.display = 'none';
         }
     }
     
-    // Guardar nuevo registro
-    function saveRecord(data) {
-        const newId = registros.length + 1;
-        const now = new Date();
-        const fechaStr = now.toLocaleString('es-ES');
-        
-        const nuevoRegistro = {
-            id: newId,
-            linea: data.linea,
-            actividad: data.actividad,
-            avance_semanal: data.avance_semanal || '',
-            avance_acumulado: data.avance_acumulado || '',
-            ot: data.ot,
-            responsables: data.responsables || '',
-            responsable: data.responsable || '',
-            dia: data.dia || '',
-            personas: data.personas || '',
-            horas: data.horas || '',
-            actividades: data.actividades || '',
-            fecha: fechaStr
-        };
-        
-        registros.push(nuevoRegistro);
-        saveRecords();
-        
-        return newId;
+    // Verificar conexión a Sheet.best
+    async function checkConnection() {
+        try {
+            const response = await fetch(SHEET_BEST_URL);
+            if (response.ok) {
+                document.getElementById('statusDot').className = 'status-dot';
+                document.getElementById('statusText').textContent = ' Conectado a Google Sheets vía Sheet.best';
+                return true;
+            } else {
+                throw new Error('No disponible');
+            }
+        } catch (error) {
+            document.getElementById('statusDot').className = 'status-dot offline';
+            document.getElementById('statusText').textContent = ' Modo Local - Los datos se guardan localmente';
+            return false;
+        }
     }
     
     // Event Listeners
-    document.getElementById('mainForm').addEventListener('submit', (e) => {
+    document.getElementById('mainForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const submitBtn = document.getElementById('submitBtn');
@@ -606,17 +717,16 @@
         });
         
         try {
-            const newId = saveRecord(data);
-            showMessage(`✅ ¡Registro guardado exitosamente! Número: ${newId}`, 'success');
+            const newId = await saveRecord(data);
+            showMessage(`¡Registro #${newId} guardado exitosamente!`, 'success');
             e.target.reset();
             
-            // Animación de éxito
             submitBtn.style.background = '#4caf50';
             setTimeout(() => {
                 submitBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
             }, 1000);
         } catch (error) {
-            showMessage(`❌ Error: ${error.message}`, 'error');
+            showMessage(`Error: ${error.message}`, 'error');
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
@@ -631,18 +741,15 @@
         exportToExcel();
     });
     
-    document.getElementById('clearAllBtn').addEventListener('click', () => {
-        clearAllRecords();
+    document.getElementById('clearLocalBtn').addEventListener('click', () => {
+        clearLocalRecords();
     });
     
     // Inicializar
     updateTime();
     setInterval(updateTime, 1000);
     loadRecords();
-    
-    // Status visual
-    document.getElementById('statusDot').className = 'status-dot';
-    document.getElementById('statusText').textContent = '🟢 Sistema listo';
+    checkConnection();
 </script>
 </body>
 </html>
