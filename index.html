@@ -5,19 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Procesador OT - Guardado en Google Sheets</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -26,23 +20,14 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
         }
-
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 30px;
             text-align: center;
         }
-
-        .header h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-
-        .content {
-            padding: 30px;
-        }
-
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .content { padding: 30px; }
         .status-bar {
             background: #f8f9fa;
             border-radius: 10px;
@@ -55,13 +40,7 @@
             gap: 15px;
             border-left: 4px solid #4caf50;
         }
-
-        .status-indicator {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
+        .status-indicator { display: flex; align-items: center; gap: 10px; }
         .status-dot {
             width: 12px;
             height: 12px;
@@ -69,68 +48,31 @@
             background: #4caf50;
             animation: pulse 2s infinite;
         }
-
-        .status-dot.offline {
-            background: #f44336;
-            animation: none;
-        }
-
+        .status-dot.offline { background: #f44336; animation: none; }
         @keyframes pulse {
             0% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.5; transform: scale(1.2); }
             100% { opacity: 1; transform: scale(1); }
         }
-
-        .stats {
-            display: flex;
-            gap: 20px;
-            font-size: 14px;
-        }
-
-        .stats div {
-            padding: 5px 10px;
-            background: white;
-            border-radius: 5px;
-        }
-
-        .stats span {
-            font-weight: bold;
-            color: #667eea;
-            font-size: 18px;
-            margin-left: 5px;
-        }
-
+        .stats { display: flex; gap: 20px; font-size: 14px; }
+        .stats div { padding: 5px 10px; background: white; border-radius: 5px; }
+        .stats span { font-weight: bold; color: #667eea; font-size: 18px; margin-left: 5px; }
         .form-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin-bottom: 20px;
         }
-
-        .full-width {
-            grid-column: 1 / -1;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
+        .full-width { grid-column: 1 / -1; }
+        .form-group { display: flex; flex-direction: column; }
         label {
             font-size: 12px;
             font-weight: 600;
             margin-bottom: 5px;
             color: #555;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
-
-        label.required::after {
-            content: "*";
-            color: #f44336;
-            margin-left: 4px;
-        }
-
+        label.required::after { content: "*"; color: #f44336; margin-left: 4px; }
         input, textarea {
             padding: 12px;
             border: 2px solid #e0e0e0;
@@ -139,18 +81,12 @@
             transition: all 0.3s;
             font-family: inherit;
         }
-
         input:focus, textarea:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
-
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
+        textarea { resize: vertical; min-height: 100px; }
         button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -163,17 +99,8 @@
             font-weight: bold;
             transition: all 0.3s;
         }
-
-        button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
+        button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
         .message {
             margin-top: 20px;
             padding: 15px;
@@ -182,28 +109,9 @@
             font-weight: 500;
             display: none;
         }
-
-        .message.success {
-            display: block;
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .message.error {
-            display: block;
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .message.info {
-            display: block;
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
+        .message.success { display: block; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .message.error { display: block; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .message.info { display: block; background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
         .loading-spinner {
             display: inline-block;
             width: 20px;
@@ -215,66 +123,19 @@
             margin-right: 8px;
             vertical-align: middle;
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .records-table {
-            margin-top: 30px;
-            overflow-x: auto;
-        }
-
-        .records-table table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .records-table th,
-        .records-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .records-table th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #555;
-            font-size: 12px;
-            text-transform: uppercase;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .btn-group button {
-            flex: 1;
-        }
-
-        .btn-excel {
-            background: #28a745;
-        }
-
-        .btn-sync {
-            background: #17a2b8;
-        }
-
-        .btn-clear {
-            background: #dc3545;
-        }
-
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .records-table { margin-top: 30px; overflow-x: auto; }
+        .records-table table { width: 100%; border-collapse: collapse; }
+        .records-table th, .records-table td { padding: 12px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+        .records-table th { background: #f8f9fa; font-weight: 600; color: #555; font-size: 12px; text-transform: uppercase; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-group button { flex: 1; }
+        .btn-excel { background: #28a745; }
+        .btn-sync { background: #17a2b8; }
+        .btn-clear { background: #dc3545; }
         @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .btn-group {
-                flex-direction: column;
-            }
+            .form-grid { grid-template-columns: 1fr; }
+            .btn-group { flex-direction: column; }
         }
     </style>
 </head>
@@ -301,22 +162,22 @@
             <div class="form-grid">
                 <div class="form-group full-width">
                     <label class="required">📍 LÍNEA/SUBESTACIÓN</label>
-                    <input type="text" name="linea" placeholder="Ej: S/E (03) Barrio Nuevo" required>
+                    <input type="text" name="linea" placeholder="Ej: S/E (26) ALANGASI" required>
                 </div>
                 
                 <div class="form-group full-width">
                     <label class="required">⚙️ ACTIVIDAD</label>
-                    <input type="text" name="actividad" placeholder="Ej: Mantenimiento Preventivo" required>
+                    <input type="text" name="actividad" placeholder="Ej: MANTENIMIENTO PREVENTIVO" required>
                 </div>
                 
                 <div class="form-group">
                     <label>📈 AVANCE SEMANAL [%]</label>
-                    <input type="text" name="avance_semanal" placeholder="Ej: 75.5">
+                    <input type="text" name="avance_semanal" placeholder="Ej: 75">
                 </div>
                 
                 <div class="form-group">
                     <label>📊 AVANCE ACUMULADO [%]</label>
-                    <input type="text" name="avance_acumulado" placeholder="Ej: 60.2">
+                    <input type="text" name="avance_acumulado" placeholder="Ej: 60">
                 </div>
                 
                 <div class="form-group">
@@ -326,32 +187,32 @@
                 
                 <div class="form-group">
                     <label>👥 RESPONSABLES</label>
-                    <input type="text" name="responsables" placeholder="Nombres de responsables">
+                    <input type="text" name="responsables" placeholder="Ej: CUSI SANTIAGO PATRICIO">
                 </div>
                 
                 <div class="form-group">
                     <label>👤 RESPONSABLE</label>
-                    <input type="text" name="responsable" placeholder="Nombre del responsable principal">
+                    <input type="text" name="responsable" placeholder="Ej: DM">
                 </div>
                 
                 <div class="form-group">
                     <label>📅 DÍA</label>
-                    <input type="text" name="dia" placeholder="Ej: lunes - viernes">
+                    <input type="text" name="dia" placeholder="Ej: 1">
                 </div>
                 
                 <div class="form-group">
                     <label>👷 NÚMERO DE PERSONAS</label>
-                    <input type="text" name="personas" placeholder="Cantidad de personas">
+                    <input type="text" name="personas" placeholder="Ej: 1">
                 </div>
                 
                 <div class="form-group">
                     <label>⏱️ HORAS HOMBRE</label>
-                    <input type="text" name="horas" placeholder="Horas hombre">
+                    <input type="text" name="horas" placeholder="Ej: 4">
                 </div>
                 
                 <div class="form-group full-width">
                     <label>📝 ACTIVIDADES</label>
-                    <textarea name="actividades" placeholder="Descripción detallada de las actividades realizadas..."></textarea>
+                    <textarea name="actividades" placeholder="Descripción detallada..."></textarea>
                 </div>
             </div>
             
@@ -361,23 +222,15 @@
         </form>
         
         <div class="btn-group">
-            <button type="button" id="viewRecordsBtn" class="btn-sync">
-                📋 Ver Registros Locales
-            </button>
-            <button type="button" id="exportExcelBtn" class="btn-excel">
-                📊 Exportar a Excel
-            </button>
-            <button type="button" id="clearLocalBtn" class="btn-clear">
-                🗑️ Limpiar Datos Locales
-            </button>
+            <button type="button" id="viewRecordsBtn" class="btn-sync">📋 Ver Registros</button>
+            <button type="button" id="exportExcelBtn" class="btn-excel">📊 Exportar a Excel</button>
+            <button type="button" id="clearLocalBtn" class="btn-clear">🗑️ Limpiar Datos</button>
         </div>
         
         <div id="recordsContainer" style="display: none;">
             <div class="records-table">
                 <table id="recordsTable">
-                    <thead>
-                        <tr><th>No.</th><th>LÍNEA/SUBESTACIÓN</th><th>ACTIVIDAD</th><th>AVANCE SEMANAL</th><th>AVANCE ACUMULADO</th><th>OT</th><th>RESPONSABLES</th><th>RESPONSABLE</th><th>DÍA</th><th>PERSONAS</th><th>HORAS</th><th>ACTIVIDADES</th><th>FECHA</th></tr>
-                    </thead>
+                    <thead><tr><th>No.</th><th>LÍNEA/SUBESTACIÓN</th><th>ACTIVIDAD</th><th>AVANCE SEMANAL</th><th>AVANCE ACUMULADO</th><th>OT</th><th>RESPONSABLES</th><th>RESPONSABLE</th><th>DÍA</th><th>PERSONAS</th><th>HORAS</th><th>ACTIVIDADES</th><th>FECHA</th></tr></thead>
                     <tbody id="recordsBody"></tbody>
                 </table>
             </div>
@@ -388,7 +241,7 @@
 </div>
 
 <script>
-    // Tu endpoint de Sheet.best
+    // Sheet.best endpoint
     const SHEET_BEST_URL = "https://api.sheetbest.com/sheets/63d8bf52-79fb-4d2e-9426-eff064fb1112";
     
     let registros = [];
@@ -419,91 +272,66 @@
         setTimeout(() => msg.style.display = 'none', 5000);
     }
     
-    // Función mejorada para guardar en Sheet.best
+    // Guardar usando la estructura correcta de Sheet.best
     async function saveToSheetBest(data) {
-        console.log('Intentando guardar en Sheet.best:', data);
+        console.log('Enviando a Sheet.best:', data);
         
         try {
             const response = await fetch(SHEET_BEST_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify([data])
             });
             
             const responseText = await response.text();
-            console.log('Respuesta del servidor:', response.status, responseText);
+            console.log('Respuesta:', response.status, responseText);
             
             if (response.ok) {
-                try {
-                    const jsonResponse = JSON.parse(responseText);
-                    return { success: true, data: jsonResponse };
-                } catch(e) {
-                    return { success: true, message: 'Guardado exitoso' };
-                }
+                return { success: true };
             } else {
-                return { success: false, error: `Error ${response.status}: ${responseText}` };
+                return { success: false, error: responseText };
             }
         } catch (error) {
-            console.error('Error de red:', error);
+            console.error('Error:', error);
             return { success: false, error: error.message };
         }
     }
     
-    // Probar conexión y ver estructura
-    async function testSheetBestConnection() {
-        try {
-            const response = await fetch(SHEET_BEST_URL);
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Conexión exitosa. Datos existentes:', data);
-                document.getElementById('statusDot').className = 'status-dot';
-                document.getElementById('statusText').textContent = '🟢 Conectado a Sheet.best';
-                return true;
-            }
-        } catch (error) {
-            console.error('Error de conexión:', error);
-        }
-        document.getElementById('statusDot').className = 'status-dot offline';
-        document.getElementById('statusText').textContent = '🔴 Error de conexión';
-        return false;
-    }
-    
-    async function saveRecord(data) {
+    async function saveRecord(formData) {
         const newId = registros.length + 1;
         const fecha = new Date().toLocaleString('es-ES');
         
-        // Datos para Sheet.best - Usando los nombres de columna que vimos en tu hoja
+        // Crear objeto con la estructura que Sheet.best espera
+        // Usando los mismos nombres de columna que ya existen en tu hoja
         const sheetData = {
-            "No.": newId,
-            "LÍNEA/SUBESTACIÓN": data.linea,
-            "ACTIVIDAD": data.actividad,
-            "AVANCE SEMANAL [%]": data.avance_semanal || "",
-            "AVANCE ACUMULADO [%]": data.avance_acumulado || "",
-            "OT": data.ot,
-            "RESPONSABLES": data.responsables || "",
-            "RESPONSABLE": data.responsable || "",
-            "DÍA": data.dia || "",
-            "NUMERO DE PERSONAS": data.personas || "",
-            "HORAS HOMBRE": data.horas || "",
-            "ACTIVIDADES": data.actividades || "",
-            "FECHA_REGISTRO": fecha
+            "a": newId.toString(),  // Columna A = No.
+            "1": formData.linea,    // Columna B = LÍNEA/SUBESTACIÓN
+            "Actividades fuera de la programación": formData.actividad,  // Columna C = ACTIVIDAD
+            "3": formData.avance_semanal || "",    // Columna D = AVANCE SEMANAL
+            "4": formData.avance_acumulado || "",  // Columna E = AVANCE ACUMULADO
+            "5": formData.ot,          // Columna F = OT
+            "6": formData.responsables || "",  // Columna G = RESPONSABLES
+            "7": formData.responsable || "",    // Columna H = RESPONSABLE
+            "8": formData.dia || "",    // Columna I = DÍA
+            "9": formData.personas || "",  // Columna J = NUMERO DE PERSONAS
+            "10": formData.horas || "",    // Columna K = HORAS HOMBRE
+            "11": formData.actividades || "",  // Columna L = ACTIVIDADES
+            "fecha_registro": fecha
         };
         
         // Guardar localmente
         const localRecord = {
-            id: newId, linea: data.linea, actividad: data.actividad,
-            avance_semanal: data.avance_semanal, avance_acumulado: data.avance_acumulado,
-            ot: data.ot, responsables: data.responsables, responsable: data.responsable,
-            dia: data.dia, personas: data.personas, horas: data.horas,
-            actividades: data.actividades, fecha: fecha
+            id: newId, linea: formData.linea, actividad: formData.actividad,
+            avance_semanal: formData.avance_semanal, avance_acumulado: formData.avance_acumulado,
+            ot: formData.ot, responsables: formData.responsables, responsable: formData.responsable,
+            dia: formData.dia, personas: formData.personas, horas: formData.horas,
+            actividades: formData.actividades, fecha: fecha
         };
         
         registros.push(localRecord);
         saveRecords();
         
-        // Intentar guardar en Sheet.best
+        // Guardar en Sheet.best
         const result = await saveToSheetBest(sheetData);
         
         if (result.success) {
@@ -517,7 +345,7 @@
     
     function exportToExcel() {
         if (registros.length === 0) {
-            showMessage('No hay registros para exportar', 'error');
+            showMessage('No hay registros', 'error');
             return;
         }
         
@@ -581,6 +409,22 @@
         }
     }
     
+    async function testConnection() {
+        try {
+            const response = await fetch(SHEET_BEST_URL);
+            if (response.ok) {
+                document.getElementById('statusDot').className = 'status-dot';
+                document.getElementById('statusText').textContent = '🟢 Conectado a Sheet.best';
+                return true;
+            }
+        } catch(e) {
+            console.error(e);
+        }
+        document.getElementById('statusDot').className = 'status-dot offline';
+        document.getElementById('statusText').textContent = '🔴 Sin conexión';
+        return false;
+    }
+    
     // Event Listeners
     document.getElementById('mainForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -611,10 +455,7 @@
     updateTime();
     setInterval(updateTime, 1000);
     loadRecords();
-    testSheetBestConnection();
-    
-    // Abrir consola para ver errores
-    console.log('Sistema iniciado. Revisa la consola (F12) para ver detalles del guardado.');
+    testConnection();
 </script>
 </body>
 </html>
