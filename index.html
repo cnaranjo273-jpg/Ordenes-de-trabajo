@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Procesador OT - Conectado a Google Sheets</title>
+    <title>Sistema Procesador OT - Guardado en Google Sheets</title>
     <style>
         * {
             margin: 0;
@@ -25,18 +25,6 @@
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
-            animation: slideIn 0.5s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .header {
@@ -49,11 +37,6 @@
         .header h1 {
             font-size: 32px;
             margin-bottom: 10px;
-        }
-
-        .header p {
-            opacity: 0.9;
-            font-size: 14px;
         }
 
         .content {
@@ -148,7 +131,7 @@
             margin-left: 4px;
         }
 
-        input, textarea, select {
+        input, textarea {
             padding: 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
@@ -157,7 +140,7 @@
             font-family: inherit;
         }
 
-        input:focus, textarea:focus, select:focus {
+        input:focus, textarea:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -198,12 +181,6 @@
             text-align: center;
             font-weight: 500;
             display: none;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .message.success {
@@ -268,10 +245,6 @@
             text-transform: uppercase;
         }
 
-        .records-table tr:hover {
-            background: #f8f9fa;
-        }
-
         .btn-group {
             display: flex;
             gap: 10px;
@@ -286,43 +259,17 @@
             background: #28a745;
         }
 
-        .btn-excel:hover {
-            background: #218838;
-        }
-
         .btn-sync {
             background: #17a2b8;
-        }
-
-        .btn-sync:hover {
-            background: #138496;
         }
 
         .btn-clear {
             background: #dc3545;
         }
 
-        .btn-clear:hover {
-            background: #c82333;
-        }
-
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
-            }
-            
-            .content {
-                padding: 20px;
-            }
-            
-            .status-bar {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .stats {
-                width: 100%;
-                justify-content: space-between;
             }
             
             .btn-group {
@@ -334,8 +281,8 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>Sistema Procesador OT</h1>
-        <p>Gestión de Órdenes de Trabajo - Conectado a Google Sheets vía Sheet.best</p>
+        <h1>📊 Sistema Procesador OT</h1>
+        <p>Guardado automático en Google Sheets</p>
     </div>
     
     <div class="content">
@@ -345,84 +292,83 @@
                 <span id="statusText">Verificando conexión...</span>
             </div>
             <div class="stats">
-                <div>Total Registros: <span id="totalRecords">0</span></div>
-                <div>Último No.: <span id="lastRecord">-</span></div>
-                <div>Hora: <span id="currentTime">-</span></div>
+                <div>📝 Total Registros: <span id="totalRecords">0</span></div>
+                <div>🕐 Hora: <span id="currentTime">-</span></div>
             </div>
         </div>
         
         <form id="mainForm">
             <div class="form-grid">
                 <div class="form-group full-width">
-                    <label class="required">LÍNEA/SUBESTACIÓN</label>
-                    <input type="text" name="LÍNEA/SUBESTACIÓN" placeholder="Ej: S/E (03) Barrio Nuevo" required>
+                    <label class="required">📍 LÍNEA/SUBESTACIÓN</label>
+                    <input type="text" name="linea" placeholder="Ej: S/E (03) Barrio Nuevo" required>
                 </div>
                 
                 <div class="form-group full-width">
-                    <label class="required">ACTIVIDAD</label>
-                    <input type="text" name="ACTIVIDAD" placeholder="Ej: Mantenimiento Preventivo" required>
+                    <label class="required">⚙️ ACTIVIDAD</label>
+                    <input type="text" name="actividad" placeholder="Ej: Mantenimiento Preventivo" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>AVANCE SEMANAL [%]</label>
-                    <input type="text" name="AVANCE SEMANAL [%]" placeholder="Ej: 75.5">
+                    <label>📈 AVANCE SEMANAL [%]</label>
+                    <input type="text" name="avance_semanal" placeholder="Ej: 75.5">
                 </div>
                 
                 <div class="form-group">
-                    <label>AVANCE ACUMULADO [%]</label>
-                    <input type="text" name="AVANCE ACUMULADO [%]" placeholder="Ej: 60.2">
+                    <label>📊 AVANCE ACUMULADO [%]</label>
+                    <input type="text" name="avance_acumulado" placeholder="Ej: 60.2">
                 </div>
                 
                 <div class="form-group">
-                    <label class="required">OT</label>
-                    <input type="text" name="OT" placeholder="Número de OT" required>
+                    <label class="required">🔖 OT</label>
+                    <input type="text" name="ot" placeholder="Número de OT" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>RESPONSABLES</label>
-                    <input type="text" name="RESPONSABLES" placeholder="Nombres de responsables">
+                    <label>👥 RESPONSABLES</label>
+                    <input type="text" name="responsables" placeholder="Nombres de responsables">
                 </div>
                 
                 <div class="form-group">
-                    <label>RESPONSABLE</label>
-                    <input type="text" name="RESPONSABLE" placeholder="Nombre del responsable principal">
+                    <label>👤 RESPONSABLE</label>
+                    <input type="text" name="responsable" placeholder="Nombre del responsable principal">
                 </div>
                 
                 <div class="form-group">
-                    <label>DÍA</label>
-                    <input type="text" name="DÍA" placeholder="Ej: lunes - viernes">
+                    <label>📅 DÍA</label>
+                    <input type="text" name="dia" placeholder="Ej: lunes - viernes">
                 </div>
                 
                 <div class="form-group">
-                    <label>NÚMERO DE PERSONAS</label>
-                    <input type="text" name="NUMERO DE PERSONAS" placeholder="Cantidad de personas">
+                    <label>👷 NÚMERO DE PERSONAS</label>
+                    <input type="text" name="personas" placeholder="Cantidad de personas">
                 </div>
                 
                 <div class="form-group">
-                    <label>HORAS HOMBRE</label>
-                    <input type="text" name="HORAS HOMBRE" placeholder="Horas hombre">
+                    <label>⏱️ HORAS HOMBRE</label>
+                    <input type="text" name="horas" placeholder="Horas hombre">
                 </div>
                 
                 <div class="form-group full-width">
-                    <label>ACTIVIDADES</label>
-                    <textarea name="ACTIVIDADES" placeholder="Descripción detallada de las actividades realizadas..."></textarea>
+                    <label>📝 ACTIVIDADES</label>
+                    <textarea name="actividades" placeholder="Descripción detallada de las actividades realizadas..."></textarea>
                 </div>
             </div>
             
             <button type="submit" id="submitBtn">
-                Guardar en Google Sheets
+                💾 Guardar en Google Sheets
             </button>
         </form>
         
         <div class="btn-group">
             <button type="button" id="viewRecordsBtn" class="btn-sync">
-                Ver Registros
+                📋 Ver Registros Locales
             </button>
             <button type="button" id="exportExcelBtn" class="btn-excel">
-                Exportar a Excel
+                📊 Exportar a Excel
             </button>
             <button type="button" id="clearLocalBtn" class="btn-clear">
-                Limpiar Local
+                🗑️ Limpiar Datos Locales
             </button>
         </div>
         
@@ -430,21 +376,7 @@
             <div class="records-table">
                 <table id="recordsTable">
                     <thead>
-                        <tr>
-                            <th>No.</th>
-                            <th>LÍNEA/SUBESTACIÓN</th>
-                            <th>ACTIVIDAD</th>
-                            <th>AVANCE SEMANAL [%]</th>
-                            <th>AVANCE ACUMULADO [%]</th>
-                            <th>OT</th>
-                            <th>RESPONSABLES</th>
-                            <th>RESPONSABLE</th>
-                            <th>DÍA</th>
-                            <th>NUMERO DE PERSONAS</th>
-                            <th>HORAS HOMBRE</th>
-                            <th>ACTIVIDADES</th>
-                            <th>FECHA REGISTRO</th>
-                        </tr>
+                        <tr><th>No.</th><th>LÍNEA/SUBESTACIÓN</th><th>ACTIVIDAD</th><th>AVANCE SEMANAL</th><th>AVANCE ACUMULADO</th><th>OT</th><th>RESPONSABLES</th><th>RESPONSABLE</th><th>DÍA</th><th>PERSONAS</th><th>HORAS</th><th>ACTIVIDADES</th><th>FECHA</th></tr>
                     </thead>
                     <tbody id="recordsBody"></tbody>
                 </table>
@@ -456,74 +388,62 @@
 </div>
 
 <script>
-    // Configuración de Sheet.best (¡YA CONFIGURADO CON TU ENDPOINT!)
+    // Tu endpoint de Sheet.best
     const SHEET_BEST_URL = "https://api.sheetbest.com/sheets/63d8bf52-79fb-4d2e-9426-eff064fb1112";
     
-    // Variables globales
     let registros = [];
     
-    // Cargar registros del localStorage
     function loadRecords() {
         const saved = localStorage.getItem('procesadorOT_registros');
-        if (saved) {
-            registros = JSON.parse(saved);
-        } else {
-            registros = [];
-        }
+        registros = saved ? JSON.parse(saved) : [];
         updateStats();
     }
     
-    // Guardar registros en localStorage
     function saveRecords() {
         localStorage.setItem('procesadorOT_registros', JSON.stringify(registros));
         updateStats();
     }
     
-    // Actualizar estadísticas
     function updateStats() {
         document.getElementById('totalRecords').textContent = registros.length;
-        if (registros.length > 0) {
-            document.getElementById('lastRecord').textContent = registros[registros.length - 1].no;
-        }
     }
     
-    // Actualizar hora actual
     function updateTime() {
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString('es-ES');
-        document.getElementById('currentTime').textContent = timeStr;
+        document.getElementById('currentTime').textContent = new Date().toLocaleTimeString('es-ES');
     }
     
-    // Mostrar mensaje
     function showMessage(text, type) {
-        const messageBox = document.getElementById('messageBox');
-        messageBox.textContent = text;
-        messageBox.className = `message ${type}`;
-        setTimeout(() => {
-            messageBox.style.display = 'none';
-            messageBox.className = 'message';
-        }, 5000);
+        const msg = document.getElementById('messageBox');
+        msg.textContent = text;
+        msg.className = `message ${type}`;
+        setTimeout(() => msg.style.display = 'none', 5000);
     }
     
-    // Guardar en Google Sheets via Sheet.best
+    // Función mejorada para guardar en Sheet.best
     async function saveToSheetBest(data) {
+        console.log('Intentando guardar en Sheet.best:', data);
+        
         try {
             const response = await fetch(SHEET_BEST_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify([data]) // Sheet.best espera un array
+                body: JSON.stringify([data])
             });
             
+            const responseText = await response.text();
+            console.log('Respuesta del servidor:', response.status, responseText);
+            
             if (response.ok) {
-                const result = await response.json();
-                console.log('Respuesta Sheet.best:', result);
-                return { success: true, message: 'Guardado en Google Sheets' };
+                try {
+                    const jsonResponse = JSON.parse(responseText);
+                    return { success: true, data: jsonResponse };
+                } catch(e) {
+                    return { success: true, message: 'Guardado exitoso' };
+                }
             } else {
-                const error = await response.text();
-                console.error('Error Sheet.best:', error);
-                return { success: false, error: `Error ${response.status}: ${error}` };
+                return { success: false, error: `Error ${response.status}: ${responseText}` };
             }
         } catch (error) {
             console.error('Error de red:', error);
@@ -531,123 +451,103 @@
         }
     }
     
-    // Guardar nuevo registro
+    // Probar conexión y ver estructura
+    async function testSheetBestConnection() {
+        try {
+            const response = await fetch(SHEET_BEST_URL);
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Conexión exitosa. Datos existentes:', data);
+                document.getElementById('statusDot').className = 'status-dot';
+                document.getElementById('statusText').textContent = '🟢 Conectado a Sheet.best';
+                return true;
+            }
+        } catch (error) {
+            console.error('Error de conexión:', error);
+        }
+        document.getElementById('statusDot').className = 'status-dot offline';
+        document.getElementById('statusText').textContent = '🔴 Error de conexión';
+        return false;
+    }
+    
     async function saveRecord(data) {
-        const newNo = registros.length + 1;
-        const now = new Date();
-        const fechaStr = now.toLocaleString('es-ES');
+        const newId = registros.length + 1;
+        const fecha = new Date().toLocaleString('es-ES');
         
-        // Crear objeto con los nombres de columna exactos que tiene tu hoja
-        const nuevoRegistro = {
-            "No.": newNo,
-            "LÍNEA/SUBESTACIÓN": data["LÍNEA/SUBESTACIÓN"],
-            "ACTIVIDAD": data["ACTIVIDAD"],
-            "AVANCE SEMANAL [%]": data["AVANCE SEMANAL [%]"] || "",
-            "AVANCE ACUMULADO [%]": data["AVANCE ACUMULADO [%]"] || "",
-            "OT": data["OT"],
-            "RESPONSABLES": data["RESPONSABLES"] || "",
-            "RESPONSABLE": data["RESPONSABLE"] || "",
-            "DÍA": data["DÍA"] || "",
-            "NUMERO DE PERSONAS": data["NUMERO DE PERSONAS"] || "",
-            "HORAS HOMBRE": data["HORAS HOMBRE"] || "",
-            "ACTIVIDADES": data["ACTIVIDADES"] || "",
-            "FECHA_REGISTRO": fechaStr,
-            "timestamp": now.toISOString()
-        };
-        
-        // También guardamos una copia local para mostrar en la tabla
-        const registroLocal = {
-            no: newNo,
-            linea: data["LÍNEA/SUBESTACIÓN"],
-            actividad: data["ACTIVIDAD"],
-            avance_semanal: data["AVANCE SEMANAL [%]"] || "",
-            avance_acumulado: data["AVANCE ACUMULADO [%]"] || "",
-            ot: data["OT"],
-            responsables: data["RESPONSABLES"] || "",
-            responsable: data["RESPONSABLE"] || "",
-            dia: data["DÍA"] || "",
-            numero_personas: data["NUMERO DE PERSONAS"] || "",
-            horas_hombre: data["HORAS HOMBRE"] || "",
-            actividades: data["ACTIVIDADES"] || "",
-            fecha_registro: fechaStr
+        // Datos para Sheet.best - Usando los nombres de columna que vimos en tu hoja
+        const sheetData = {
+            "No.": newId,
+            "LÍNEA/SUBESTACIÓN": data.linea,
+            "ACTIVIDAD": data.actividad,
+            "AVANCE SEMANAL [%]": data.avance_semanal || "",
+            "AVANCE ACUMULADO [%]": data.avance_acumulado || "",
+            "OT": data.ot,
+            "RESPONSABLES": data.responsables || "",
+            "RESPONSABLE": data.responsable || "",
+            "DÍA": data.dia || "",
+            "NUMERO DE PERSONAS": data.personas || "",
+            "HORAS HOMBRE": data.horas || "",
+            "ACTIVIDADES": data.actividades || "",
+            "FECHA_REGISTRO": fecha
         };
         
         // Guardar localmente
-        registros.push(registroLocal);
+        const localRecord = {
+            id: newId, linea: data.linea, actividad: data.actividad,
+            avance_semanal: data.avance_semanal, avance_acumulado: data.avance_acumulado,
+            ot: data.ot, responsables: data.responsables, responsable: data.responsable,
+            dia: data.dia, personas: data.personas, horas: data.horas,
+            actividades: data.actividades, fecha: fecha
+        };
+        
+        registros.push(localRecord);
         saveRecords();
         
-        // Guardar en Sheet.best
-        try {
-            const result = await saveToSheetBest(nuevoRegistro);
-            if (result.success) {
-                showMessage(`Registro #${newNo} guardado en Google Sheets y localmente`, 'success');
-            } else {
-                showMessage(`Registro #${newNo} guardado solo localmente. Error en Sheet.best: ${result.error}`, 'info');
-            }
-        } catch (error) {
-            showMessage(`Registro #${newNo} guardado localmente. No se pudo conectar con Sheet.best.`, 'info');
+        // Intentar guardar en Sheet.best
+        const result = await saveToSheetBest(sheetData);
+        
+        if (result.success) {
+            showMessage(`✅ Registro #${newId} guardado en Google Sheets`, 'success');
+        } else {
+            showMessage(`⚠️ Registro #${newId} guardado SOLO LOCALMENTE. Error: ${result.error}`, 'error');
         }
         
-        return newNo;
+        return newId;
     }
     
-    // Exportar a Excel (CSV)
     function exportToExcel() {
         if (registros.length === 0) {
             showMessage('No hay registros para exportar', 'error');
             return;
         }
         
-        const headers = [
-            'No.', 'LÍNEA/SUBESTACIÓN', 'ACTIVIDAD', 'AVANCE SEMANAL [%]', 
-            'AVANCE ACUMULADO [%]', 'OT', 'RESPONSABLES', 'RESPONSABLE', 
-            'DÍA', 'NUMERO DE PERSONAS', 'HORAS HOMBRE', 'ACTIVIDADES', 'FECHA REGISTRO'
-        ];
-        
+        const headers = ['No.','LÍNEA/SUBESTACIÓN','ACTIVIDAD','AVANCE SEMANAL','AVANCE ACUMULADO','OT','RESPONSABLES','RESPONSABLE','DÍA','PERSONAS','HORAS','ACTIVIDADES','FECHA'];
         const csvData = [headers];
         
         registros.forEach(reg => {
             csvData.push([
-                reg.no,
-                reg.linea,
-                reg.actividad,
-                reg.avance_semanal,
-                reg.avance_acumulado,
-                reg.ot,
-                reg.responsables,
-                reg.responsable,
-                reg.dia,
-                reg.numero_personas,
-                reg.horas_hombre,
-                reg.actividades,
-                reg.fecha_registro
+                reg.id, reg.linea, reg.actividad, reg.avance_semanal || '', reg.avance_acumulado || '',
+                reg.ot, reg.responsables || '', reg.responsable || '', reg.dia || '',
+                reg.personas || '', reg.horas || '', reg.actividades || '', reg.fecha
             ]);
         });
         
-        const csvContent = csvData.map(row => 
-            row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-        ).join('\n');
-        
+        const csvContent = csvData.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
         const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.href = url;
-        link.setAttribute('download', `procesador_ot_${new Date().toISOString().slice(0,19)}.csv`);
-        document.body.appendChild(link);
+        link.href = URL.createObjectURL(blob);
+        link.download = `procesador_ot_${Date.now()}.csv`;
         link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        
-        showMessage('Registros exportados a Excel exitosamente', 'success');
+        URL.revokeObjectURL(link.href);
+        showMessage('✅ Exportado a Excel', 'success');
     }
     
-    // Mostrar todos los registros
     function displayRecords() {
         const container = document.getElementById('recordsContainer');
         const tbody = document.getElementById('recordsBody');
         
         if (registros.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="13" style="text-align: center;">No hay registros guardados</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="13" style="text-align: center;">No hay registros</td></tr>';
             container.style.display = 'block';
             return;
         }
@@ -655,7 +555,7 @@
         tbody.innerHTML = '';
         registros.slice().reverse().forEach(reg => {
             const row = tbody.insertRow();
-            row.insertCell(0).textContent = reg.no;
+            row.insertCell(0).textContent = reg.id;
             row.insertCell(1).textContent = reg.linea;
             row.insertCell(2).textContent = reg.actividad;
             row.insertCell(3).textContent = reg.avance_semanal || '-';
@@ -664,92 +564,57 @@
             row.insertCell(6).textContent = reg.responsables || '-';
             row.insertCell(7).textContent = reg.responsable || '-';
             row.insertCell(8).textContent = reg.dia || '-';
-            row.insertCell(9).textContent = reg.numero_personas || '-';
-            row.insertCell(10).textContent = reg.horas_hombre || '-';
+            row.insertCell(9).textContent = reg.personas || '-';
+            row.insertCell(10).textContent = reg.horas || '-';
             row.insertCell(11).textContent = reg.actividades || '-';
-            row.insertCell(12).textContent = reg.fecha_registro || '-';
+            row.insertCell(12).textContent = reg.fecha || '-';
         });
-        
         container.style.display = 'block';
     }
     
-    // Limpiar registros locales
-    function clearLocalRecords() {
-        if (confirm('¿Estás seguro de que deseas eliminar TODOS los registros locales? Esto no afecta a Google Sheets.')) {
+    function clearLocal() {
+        if (confirm('¿Eliminar todos los registros locales?')) {
             registros = [];
             saveRecords();
-            showMessage('Todos los registros locales han sido eliminados', 'success');
+            showMessage('Registros locales eliminados', 'success');
             document.getElementById('recordsContainer').style.display = 'none';
-        }
-    }
-    
-    // Verificar conexión a Sheet.best
-    async function checkConnection() {
-        try {
-            const response = await fetch(SHEET_BEST_URL);
-            if (response.ok) {
-                document.getElementById('statusDot').className = 'status-dot';
-                document.getElementById('statusText').textContent = ' Conectado a Google Sheets vía Sheet.best';
-                return true;
-            } else {
-                throw new Error('No disponible');
-            }
-        } catch (error) {
-            document.getElementById('statusDot').className = 'status-dot offline';
-            document.getElementById('statusText').textContent = ' Modo Local - Los datos se guardan localmente';
-            return false;
         }
     }
     
     // Event Listeners
     document.getElementById('mainForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        const submitBtn = document.getElementById('submitBtn');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="loading-spinner"></span> Guardando...';
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading-spinner"></span> Guardando...';
         
         const formData = new FormData(e.target);
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
+        const data = Object.fromEntries(formData.entries());
         
         try {
             const newId = await saveRecord(data);
-            showMessage(`¡Registro #${newId} guardado exitosamente!`, 'success');
+            showMessage(`✅ Registro #${newId} guardado`, 'success');
             e.target.reset();
-            
-            submitBtn.style.background = '#4caf50';
-            setTimeout(() => {
-                submitBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-            }, 1000);
         } catch (error) {
             showMessage(`Error: ${error.message}`, 'error');
         } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.innerHTML = '💾 Guardar en Google Sheets';
         }
     });
     
-    document.getElementById('viewRecordsBtn').addEventListener('click', () => {
-        displayRecords();
-    });
-    
-    document.getElementById('exportExcelBtn').addEventListener('click', () => {
-        exportToExcel();
-    });
-    
-    document.getElementById('clearLocalBtn').addEventListener('click', () => {
-        clearLocalRecords();
-    });
+    document.getElementById('viewRecordsBtn').addEventListener('click', displayRecords);
+    document.getElementById('exportExcelBtn').addEventListener('click', exportToExcel);
+    document.getElementById('clearLocalBtn').addEventListener('click', clearLocal);
     
     // Inicializar
     updateTime();
     setInterval(updateTime, 1000);
     loadRecords();
-    checkConnection();
+    testSheetBestConnection();
+    
+    // Abrir consola para ver errores
+    console.log('Sistema iniciado. Revisa la consola (F12) para ver detalles del guardado.');
 </script>
 </body>
 </html>
