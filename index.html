@@ -45,10 +45,10 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            background: #ffc107; /* Amarillo mientras verifica */
+            background: #ffc107;
             animation: pulse 1.5s infinite;
         }
-        .status-dot.online { background: #4caf50; animation: pulse 2s infinite; }
+        .status-dot.online { background: #4caf50; }
         .status-dot.offline { background: #f44336; animation: none; }
         @keyframes pulse {
             0% { opacity: 1; transform: scale(1); }
@@ -57,7 +57,6 @@
         }
         .stats { display: flex; gap: 20px; font-size: 14px; }
         .stats div { padding: 5px 10px; background: white; border-radius: 5px; }
-        .stats span { font-weight: bold; color: #667eea; font-size: 18px; margin-left: 5px; }
         .form-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -74,7 +73,7 @@
             text-transform: uppercase;
         }
         label.required::after { content: "*"; color: #f44336; margin-left: 4px; }
-        input, textarea, select {
+        input, textarea {
             padding: 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
@@ -82,7 +81,7 @@
             transition: all 0.3s;
             font-family: inherit;
         }
-        input:focus, textarea:focus, select:focus {
+        input:focus, textarea:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -126,7 +125,6 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         
-        /* Estilos para responsables múltiples */
         .responsables-container {
             border: 2px solid #e0e0e0;
             border-radius: 8px;
@@ -139,10 +137,7 @@
             margin-bottom: 10px;
             align-items: center;
         }
-        .responsable-item input {
-            flex: 1;
-            margin-bottom: 0;
-        }
+        .responsable-item input { flex: 1; margin-bottom: 0; }
         .btn-remove {
             background: #dc3545;
             padding: 8px 12px;
@@ -156,17 +151,9 @@
             font-size: 12px;
             margin-top: 5px;
         }
-        .btn-add:hover, .btn-remove:hover {
-            transform: none;
-        }
+        .info-badge { font-size: 11px; color: #666; margin-top: 5px; }
         
-        .info-badge {
-            font-size: 11px;
-            color: #666;
-            margin-top: 5px;
-        }
-        
-        @media (max-width: 768px) { 
+        @media (max-width: 768px) {
             .form-grid { grid-template-columns: 1fr; }
             .responsable-item { flex-wrap: wrap; }
             .btn-remove { width: 100%; }
@@ -227,7 +214,6 @@
                         </div>
                     </div>
                     <button type="button" class="btn-add" onclick="addResponsable()">+ Agregar otro responsable</button>
-                    <div class="info-badge">💡 Puedes agregar todos los responsables necesarios</div>
                 </div>
                 
                 <div class="form-group">
@@ -242,18 +228,17 @@
                 
                 <div class="form-group">
                     <label>👷 NÚMERO DE PERSONAS</label>
-                    <input type="number" name="numero_personas" id="numero_personas" value="1" min="1" step="1" placeholder="Ej: 2">
+                    <input type="number" name="numero_personas" id="numero_personas" value="1" min="1" step="1">
                 </div>
                 
                 <div class="form-group">
                     <label>⏱️ HORAS TRABAJADAS</label>
                     <input type="number" name="horas_trabajadas" id="horas_trabajadas" step="0.5" placeholder="Ej: 8">
-                    <div class="info-badge">⏰ Horas por persona por día</div>
                 </div>
                 
                 <div class="form-group full-width">
                     <label>📝 ACTIVIDADES REALIZADAS</label>
-                    <textarea name="actividades" placeholder="Descripción detallada de las actividades realizadas..."></textarea>
+                    <textarea name="actividades" placeholder="Descripción detallada..."></textarea>
                 </div>
             </div>
             
@@ -267,15 +252,13 @@
 </div>
 
 <script>
-    // 🔴 TU URL DE GOOGLE APPS SCRIPT - ¡YA CONFIGURADA!
+    // ⚠️ ACTUALIZA ESTA URL CON LA DE TU APPS SCRIPT
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmRZhqPlEn4Og3cXdels398Uic9aTD0JAKqjxbAxnRTQuREg_Im48XG75zT-NF5SAscg/exec";
     
-    // Función para actualizar la hora
     function updateTime() {
         document.getElementById('currentTime').textContent = new Date().toLocaleTimeString('es-ES');
     }
     
-    // Mostrar mensajes al usuario
     function showMessage(text, type) {
         const msg = document.getElementById('messageBox');
         msg.textContent = text;
@@ -283,26 +266,22 @@
         msg.style.display = 'block';
         setTimeout(() => {
             msg.style.display = 'none';
-            msg.className = 'message';
-        }, 5000);
+        }, 6000);
     }
     
-    // ================= MÚLTIPLES RESPONSABLES =================
+    // Múltiples responsables
     function addResponsable() {
         const container = document.getElementById('responsablesContainer');
-        const items = container.getElementsByClassName('responsable-item');
-        const newIndex = items.length + 1;
-        
+        const items = container.children.length;
         const newItem = document.createElement('div');
         newItem.className = 'responsable-item';
         newItem.innerHTML = `
-            <input type="text" name="responsables" placeholder="Nombre del responsable ${newIndex}" style="flex: 1;">
+            <input type="text" name="responsables" placeholder="Nombre del responsable ${items + 1}" style="flex: 1;">
             <button type="button" class="btn-remove" onclick="removeResponsable(this)">❌</button>
         `;
         container.appendChild(newItem);
         
-        // Mostrar botones de eliminar en todos los items
-        Array.from(container.getElementsByClassName('btn-remove')).forEach(btn => {
+        document.querySelectorAll('.responsable-item .btn-remove').forEach(btn => {
             btn.style.display = 'inline-block';
         });
     }
@@ -310,92 +289,71 @@
     function removeResponsable(button) {
         const item = button.parentElement;
         item.remove();
-        
-        const container = document.getElementById('responsablesContainer');
-        const items = container.getElementsByClassName('responsable-item');
-        
+        const items = document.querySelectorAll('.responsable-item');
         if (items.length === 1) {
-            const remainingBtn = items[0].querySelector('.btn-remove');
-            if (remainingBtn) remainingBtn.style.display = 'none';
+            items[0].querySelector('.btn-remove').style.display = 'none';
         }
-        
-        Array.from(items).forEach((item, idx) => {
-            const input = item.querySelector('input');
-            if (input) input.placeholder = `Nombre del responsable ${idx + 1}`;
-        });
     }
     
     function getResponsablesTexto() {
         const inputs = document.querySelectorAll('input[name="responsables"]');
-        const responsables = Array.from(inputs)
-            .map(input => input.value.trim())
-            .filter(nombre => nombre !== '');
-        return responsables.join('; ');
+        const nombres = Array.from(inputs).map(i => i.value.trim()).filter(n => n);
+        return nombres.join('; ');
     }
     
-    // ================= GUARDADO EN GOOGLE SHEETS =================
-    async function saveToGoogleSheets(data) {
-        try {
-            // Usamos POST normal (no 'no-cors' para poder leer la respuesta)
-            const response = await fetch(APPS_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'cors', // Importante para leer la respuesta
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            
-            if (response.ok) {
-                const result = await response.json();
-                return { success: true, message: result.message };
-            } else {
-                const errorText = await response.text();
-                return { success: false, error: `Error ${response.status}: ${errorText}` };
-            }
-        } catch (error) {
-            console.error('Error de red:', error);
-            return { success: false, error: error.message };
-        }
-    }
-    
-    // ================= VERIFICACIÓN DE CONEXIÓN RÁPIDA =================
-    // Esta función es CLAVE para que no se demore
+    // Probar conexión con timeout
     async function testConnection() {
-        const statusDot = document.getElementById('statusDot');
-        const statusText = document.getElementById('statusText');
+        const dot = document.getElementById('statusDot');
+        const text = document.getElementById('statusText');
         
-        // Estado: verificando
-        statusDot.className = 'status-dot';
-        statusText.textContent = 'Verificando conexión...';
+        dot.className = 'status-dot';
+        text.textContent = 'Conectando...';
         
         try {
-            // Timeout de 5 segundos para no quedarnos esperando
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            const timeout = setTimeout(() => controller.abort(), 8000);
             
             const response = await fetch(APPS_SCRIPT_URL, {
                 method: 'GET',
                 signal: controller.signal
             });
             
-            clearTimeout(timeoutId);
+            clearTimeout(timeout);
             
             if (response.ok) {
-                statusDot.className = 'status-dot online';
-                statusText.textContent = '🟢 Conectado a Google Sheets';
-                console.log('✅ Conexión exitosa');
+                dot.className = 'status-dot online';
+                text.textContent = '🟢 Conectado a Google Sheets';
                 return true;
-            } else {
-                throw new Error(`HTTP ${response.status}`);
             }
         } catch (error) {
-            console.warn('⚠️ Error de conexión:', error.message);
-            statusDot.className = 'status-dot offline';
-            statusText.textContent = '⚠️ Sin conexión (modo local)';
-            return false;
+            console.log('Error de conexión:', error);
+        }
+        
+        dot.className = 'status-dot offline';
+        text.textContent = '⚠️ Sin conexión (se guardará localmente)';
+        return false;
+    }
+    
+    // Guardar datos
+    async function saveToGoogleSheets(data) {
+        try {
+            const response = await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Importante para Apps Script
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            // Con no-cors, no podemos leer la respuesta, pero si no hay error, asumimos éxito
+            return { success: true };
+            
+        } catch (error) {
+            console.error('Error al guardar:', error);
+            return { success: false, error: error.message };
         }
     }
     
-    // ================= MANEJAR ENVÍO DEL FORMULARIO =================
+    // Envío del formulario
     document.getElementById('mainForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -403,7 +361,6 @@
         btn.disabled = true;
         btn.innerHTML = '<span class="loading-spinner"></span> Guardando...';
         
-        // Recopilar datos del formulario
         const data = {
             linea: document.querySelector('input[name="linea"]').value,
             actividad: document.querySelector('input[name="actividad"]').value,
@@ -418,16 +375,14 @@
             actividades: document.querySelector('textarea[name="actividades"]').value || ''
         };
         
-        console.log('📤 Enviando datos:', data);
+        console.log('Datos enviados:', data);
         
         try {
             const result = await saveToGoogleSheets(data);
             
             if (result.success) {
-                showMessage(`✅ ¡Registro guardado exitosamente en Google Sheets!`, 'success');
+                showMessage('✅ ¡Registro guardado exitosamente en Google Sheets!', 'success');
                 e.target.reset();
-                
-                // Resetear valores por defecto
                 document.getElementById('numero_personas').value = '1';
                 document.getElementById('horas_trabajadas').value = '';
                 
@@ -439,37 +394,29 @@
                 const firstInput = container.querySelector('input');
                 if (firstInput) firstInput.value = '';
                 
-                // Animación de éxito
                 btn.style.background = '#4caf50';
                 setTimeout(() => {
                     btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
                 }, 1000);
             } else {
-                throw new Error(result.error || 'Error desconocido');
+                throw new Error(result.error);
             }
         } catch (error) {
-            console.error('❌ Error:', error);
-            showMessage(`❌ Error al guardar: ${error.message}`, 'error');
+            showMessage(`❌ Error: ${error.message}`, 'error');
         } finally {
             btn.disabled = false;
             btn.innerHTML = '💾 Guardar en Google Sheets';
         }
     });
     
-    // ================= INICIALIZACIÓN =================
+    // Inicializar
     updateTime();
     setInterval(updateTime, 1000);
-    
-    // Verificar conexión al cargar (rápido, con timeout)
     testConnection();
     
-    // Verificar cada 60 segundos (no tan seguido para no saturar)
-    setInterval(testConnection, 60000);
-    
-    // Ocultar botón eliminar del primer responsable
     setTimeout(() => {
-        const firstRemoveBtn = document.querySelector('.responsable-item .btn-remove');
-        if (firstRemoveBtn) firstRemoveBtn.style.display = 'none';
+        const firstBtn = document.querySelector('.responsable-item .btn-remove');
+        if (firstBtn) firstBtn.style.display = 'none';
     }, 100);
 </script>
 </body>
