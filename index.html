@@ -50,13 +50,39 @@
         }
         .status-dot.online { background: #4caf50; }
         .status-dot.offline { background: #f44336; animation: none; }
+        .week-info-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            background: #9c27b0;
+            color: white;
+        }
+        .weekend-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            background: #ff9800;
+            color: white;
+        }
+        .weekend-badge.weekday { background: #2196f3; }
         @keyframes pulse {
             0% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.5; transform: scale(1.2); }
             100% { opacity: 1; transform: scale(1); }
         }
-        .stats { display: flex; gap: 20px; font-size: 14px; }
-        .stats div { padding: 5px 10px; background: white; border-radius: 5px; }
+        .stats { 
+            display: flex; 
+            gap: 10px; 
+            font-size: 14px;
+            flex-wrap: wrap;
+        }
+        .stats div { 
+            padding: 5px 10px; 
+            background: white; 
+            border-radius: 5px;
+        }
         .form-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -73,7 +99,7 @@
             text-transform: uppercase;
         }
         label.required::after { content: "*"; color: #f44336; margin-left: 4px; }
-        input, textarea {
+        input, textarea, select {
             padding: 12px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
@@ -81,7 +107,7 @@
             transition: all 0.3s;
             font-family: inherit;
         }
-        input:focus, textarea:focus {
+        input:focus, textarea:focus, select:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -99,7 +125,10 @@
             font-weight: bold;
             transition: all 0.3s;
         }
-        button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        button:hover:not(:disabled) { 
+            transform: translateY(-2px); 
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); 
+        }
         button:disabled { opacity: 0.6; cursor: not-allowed; }
         .message {
             margin-top: 20px;
@@ -109,9 +138,24 @@
             font-weight: 500;
             display: none;
         }
-        .message.success { display: block; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .message.error { display: block; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .message.info { display: block; background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .message.success { 
+            display: block; 
+            background: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb; 
+        }
+        .message.error { 
+            display: block; 
+            background: #f8d7da; 
+            color: #721c24; 
+            border: 1px solid #f5c6cb; 
+        }
+        .message.info { 
+            display: block; 
+            background: #d1ecf1; 
+            color: #0c5460; 
+            border: 1px solid #bee5eb; 
+        }
         .loading-spinner {
             display: inline-block;
             width: 20px;
@@ -151,20 +195,59 @@
             font-size: 12px;
             margin-top: 5px;
         }
-        .info-badge { font-size: 11px; color: #666; margin-top: 5px; }
+        .info-badge { 
+            font-size: 11px; 
+            color: #666; 
+            margin-top: 5px; 
+        }
+        .fecha-info {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .fecha-info input { flex: 1; }
+        .table-indicator {
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 150px;
+        }
+        .table-indicator.weekday {
+            background: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #90caf9;
+        }
+        .table-indicator.weekend {
+            background: #fff3e0;
+            color: #e65100;
+            border: 1px solid #ffcc80;
+        }
+        .week-preview {
+            background: #f3e5f5;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 5px;
+            font-size: 13px;
+            border-left: 3px solid #9c27b0;
+        }
         
         @media (max-width: 768px) {
             .form-grid { grid-template-columns: 1fr; }
             .responsable-item { flex-wrap: wrap; }
             .btn-remove { width: 100%; }
+            .fecha-info { flex-direction: column; }
+            .table-indicator { width: 100%; }
+            .stats { flex-direction: column; gap: 5px; }
         }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>📊 Sistema Procesador OT</h1>
-        <p>Guardado directo en Google Sheets</p>
+        <h1>🏭 Sistema Procesador OT</h1>
+        <p>Gestión de Actividades - Google Sheets</p>
     </div>
     
     <div class="content">
@@ -174,30 +257,46 @@
                 <span id="statusText">Verificando conexión...</span>
             </div>
             <div class="stats">
-                <div>🕐 Hora: <span id="currentTime">-</span></div>
+                <div>📅 <span id="currentDate">-</span></div>
+                <div>🕐 <span id="currentTime">-</span></div>
+                <div id="weekInfoBadge" class="week-info-badge">Semana -</div>
+                <div id="weekendIndicator" class="weekend-badge">-</div>
             </div>
         </div>
         
         <form id="mainForm">
             <div class="form-grid">
+                <!-- FECHA - CAMPO PRINCIPAL -->
+                <div class="form-group">
+                    <label class="required">📆 FECHA DE ACTIVIDAD</label>
+                    <div class="fecha-info">
+                        <input type="date" name="fecha_actividad" id="fecha_actividad" required>
+                        <div id="tableTypeIndicator" class="table-indicator weekday">Entre Semana</div>
+                    </div>
+                    <div class="week-preview" id="weekPreview">
+                        Seleccione una fecha para ver la semana correspondiente
+                    </div>
+                    <div class="info-badge" id="fechaInfoText"></div>
+                </div>
+                
                 <div class="form-group full-width">
-                    <label class="required">📍 LÍNEA/SUBESTACIÓN</label>
+                    <label class="required">🔌 LÍNEA/SUBESTACIÓN</label>
                     <input type="text" name="linea" placeholder="Ej: S/E (26) ALANGASI" required>
                 </div>
                 
                 <div class="form-group full-width">
-                    <label class="required">⚙️ ACTIVIDAD</label>
+                    <label class="required">⚡ ACTIVIDAD</label>
                     <input type="text" name="actividad" placeholder="Ej: MANTENIMIENTO PREVENTIVO" required>
                 </div>
                 
                 <div class="form-group">
-                    <label>📈 AVANCE SEMANAL [%]</label>
-                    <input type="number" step="0.1" name="avance_semanal" placeholder="Ej: 75">
+                    <label>📊 AVANCE SEMANAL [%]</label>
+                    <input type="number" step="0.1" name="avance_semanal" placeholder="Ej: 75" min="0" max="100">
                 </div>
                 
                 <div class="form-group">
-                    <label>📊 AVANCE ACUMULADO [%]</label>
-                    <input type="number" step="0.1" name="avance_acumulado" placeholder="Ej: 60">
+                    <label>📈 AVANCE ACUMULADO [%]</label>
+                    <input type="number" step="0.1" name="avance_acumulado" placeholder="Ej: 60" min="0" max="100">
                 </div>
                 
                 <div class="form-group">
@@ -213,7 +312,7 @@
                             <button type="button" class="btn-remove" onclick="removeResponsable(this)" style="display: none;">❌</button>
                         </div>
                     </div>
-                    <button type="button" class="btn-add" onclick="addResponsable()">+ Agregar otro responsable</button>
+                    <button type="button" class="btn-add" onclick="addResponsable()">➕ Agregar otro responsable</button>
                 </div>
                 
                 <div class="form-group">
@@ -223,22 +322,22 @@
                 
                 <div class="form-group">
                     <label>📅 DÍA</label>
-                    <input type="text" name="dia" placeholder="Ej: lunes 1">
+                    <input type="text" name="dia" id="dia_auto" placeholder="Se autocompleta" readonly>
                 </div>
                 
                 <div class="form-group">
-                    <label>👷 NÚMERO DE PERSONAS</label>
+                    <label>👨‍🔧 NÚMERO DE PERSONAS</label>
                     <input type="number" name="numero_personas" id="numero_personas" value="1" min="1" step="1">
                 </div>
                 
                 <div class="form-group">
                     <label>⏱️ HORAS TRABAJADAS</label>
-                    <input type="number" name="horas_trabajadas" id="horas_trabajadas" step="0.5" placeholder="Ej: 8">
+                    <input type="number" name="horas_trabajadas" id="horas_trabajadas" step="0.5" placeholder="Ej: 8" min="0">
                 </div>
                 
                 <div class="form-group full-width">
                     <label>📝 ACTIVIDADES REALIZADAS</label>
-                    <textarea name="actividades" placeholder="Descripción detallada..."></textarea>
+                    <textarea name="actividades" placeholder="Descripción detallada de las actividades..."></textarea>
                 </div>
             </div>
             
@@ -252,11 +351,162 @@
 </div>
 
 <script>
-    // ⚠️ ACTUALIZA ESTA URL CON LA DE TU APPS SCRIPT
+    // ============================================
+    // CONFIGURACIÓN
+    // ============================================
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmRZhqPlEn4Og3cXdels398Uic9aTD0JAKqjxbAxnRTQuREg_Im48XG75zT-NF5SAscg/exec";
     
-    function updateTime() {
-        document.getElementById('currentTime').textContent = new Date().toLocaleTimeString('es-ES');
+    // ============================================
+    // FUNCIONES DE FECHA Y SEMANA
+    // ============================================
+    
+    /**
+     * Obtiene el número de semana ISO 8601 (1-53)
+     */
+    function getWeekNumber(fecha) {
+        const date = new Date(fecha + 'T12:00:00'); // Mediodía para evitar problemas de zona horaria
+        date.setHours(0, 0, 0, 0);
+        
+        // Ajustar al jueves de la semana actual (ISO 8601)
+        date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+        
+        // Primer día del año
+        const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+        
+        // Calcular número de semana
+        const weekNumber = Math.ceil((((date - firstDayOfYear) / 86400000) + 1) / 7);
+        
+        return weekNumber;
+    }
+    
+    /**
+     * Obtiene información completa de la semana
+     */
+    function getWeekInfo(fecha) {
+        const date = new Date(fecha + 'T12:00:00');
+        const year = date.getFullYear();
+        
+        // Obtener el lunes de la semana
+        const day = date.getDay();
+        const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+        const lunes = new Date(date);
+        lunes.setDate(diff);
+        lunes.setHours(0, 0, 0, 0);
+        
+        // Obtener el domingo
+        const domingo = new Date(lunes);
+        domingo.setDate(lunes.getDate() + 6);
+        
+        // Formatear fechas
+        const formatDate = (d) => {
+            return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+        };
+        
+        const formatDateShort = (d) => {
+            return `${d.getDate()}/${d.getMonth() + 1}`;
+        };
+        
+        const weekNumber = getWeekNumber(fecha);
+        
+        return {
+            numeroSemana: weekNumber,
+            año: year,
+            lunes: lunes,
+            domingo: domingo,
+            lunesStr: formatDate(lunes),
+            domingoStr: formatDate(domingo),
+            rangoCorto: `${formatDateShort(lunes)}-${formatDateShort(domingo)}`,
+            nombreHoja: `Semana ${weekNumber} (${formatDateShort(lunes)}-${formatDateShort(domingo)})`,
+            esSemana53: weekNumber === 53
+        };
+    }
+    
+    /**
+     * Determina si una fecha es fin de semana
+     */
+    function esFinDeSemana(fecha) {
+        if (!fecha) return false;
+        const date = new Date(fecha + 'T12:00:00');
+        const dia = date.getDay();
+        return dia === 0 || dia === 6;
+    }
+    
+    /**
+     * Obtiene el nombre del día en español
+     */
+    function getNombreDia(fecha) {
+        if (!fecha) return '';
+        const date = new Date(fecha + 'T12:00:00');
+        const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        return dias[date.getDay()];
+    }
+    
+    // ============================================
+    // FUNCIONES DE INTERFAZ
+    // ============================================
+    
+    function updateDateTime() {
+        const now = new Date();
+        document.getElementById('currentTime').textContent = now.toLocaleTimeString('es-ES');
+        document.getElementById('currentDate').textContent = now.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+    }
+    
+    function actualizarIndicadoresFecha() {
+        const fechaInput = document.getElementById('fecha_actividad');
+        const fecha = fechaInput.value;
+        const diaInput = document.getElementById('dia_auto');
+        const weekendIndicator = document.getElementById('weekendIndicator');
+        const tableIndicator = document.getElementById('tableTypeIndicator');
+        const fechaInfoText = document.getElementById('fechaInfoText');
+        const weekPreview = document.getElementById('weekPreview');
+        const weekInfoBadge = document.getElementById('weekInfoBadge');
+        
+        if (fecha) {
+            const nombreDia = getNombreDia(fecha);
+            diaInput.value = nombreDia;
+            
+            const esFinde = esFinDeSemana(fecha);
+            const weekInfo = getWeekInfo(fecha);
+            
+            // Actualizar badge de semana
+            weekInfoBadge.textContent = `📋 ${weekInfo.nombreHoja}`;
+            
+            // Actualizar preview de semana
+            weekPreview.innerHTML = `
+                <strong>📌 Semana ${weekInfo.numeroSemana} del ${weekInfo.año}</strong><br>
+                📅 Del ${weekInfo.lunesStr} al ${weekInfo.domingoStr}<br>
+                💾 Se guardará en la hoja: <strong>"${weekInfo.nombreHoja}"</strong>
+                ${weekInfo.esSemana53 ? '<br>⚠️ Semana 53 - Verificar año' : ''}
+            `;
+            
+            // Actualizar indicadores de fin de semana
+            if (esFinde) {
+                weekendIndicator.textContent = '🏖️ FIN DE SEMANA';
+                weekendIndicator.className = 'weekend-badge';
+                tableIndicator.textContent = '📅 TABLA FIN DE SEMANA';
+                tableIndicator.className = 'table-indicator weekend';
+                fechaInfoText.textContent = '✅ Se guardará en la tabla de FIN DE SEMANA';
+            } else {
+                weekendIndicator.textContent = '💼 ENTRE SEMANA';
+                weekendIndicator.className = 'weekend-badge weekday';
+                tableIndicator.textContent = '📊 TABLA ENTRE SEMANA';
+                tableIndicator.className = 'table-indicator weekday';
+                fechaInfoText.textContent = '✅ Se guardará en la tabla de ENTRE SEMANA';
+            }
+        } else {
+            diaInput.value = '';
+            weekendIndicator.textContent = '📅 Sin fecha';
+            weekendIndicator.className = 'weekend-badge weekday';
+            tableIndicator.textContent = 'Seleccione fecha';
+            tableIndicator.className = 'table-indicator weekday';
+            fechaInfoText.textContent = '⚠️ Seleccione una fecha';
+            weekPreview.innerHTML = 'Seleccione una fecha para ver la semana correspondiente';
+            weekInfoBadge.textContent = 'Semana -';
+        }
     }
     
     function showMessage(text, type) {
@@ -266,10 +516,9 @@
         msg.style.display = 'block';
         setTimeout(() => {
             msg.style.display = 'none';
-        }, 6000);
+        }, 8000);
     }
     
-    // Múltiples responsables
     function addResponsable() {
         const container = document.getElementById('responsablesContainer');
         const items = container.children.length;
@@ -301,7 +550,10 @@
         return nombres.join('; ');
     }
     
-    // Probar conexión con timeout
+    // ============================================
+    // CONEXIÓN CON GOOGLE SHEETS
+    // ============================================
+    
     async function testConnection() {
         const dot = document.getElementById('statusDot');
         const text = document.getElementById('statusText');
@@ -322,7 +574,7 @@
             
             if (response.ok) {
                 dot.className = 'status-dot online';
-                text.textContent = '🟢 Conectado a Google Sheets';
+                text.textContent = '✅ Conectado a Google Sheets';
                 return true;
             }
         } catch (error) {
@@ -330,21 +582,19 @@
         }
         
         dot.className = 'status-dot offline';
-        text.textContent = '⚠️ Sin conexión (se guardará localmente)';
+        text.textContent = '⚠️ Sin conexión';
         return false;
     }
     
-    // Guardar datos
     async function saveToGoogleSheets(data) {
         try {
             const response = await fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Importante para Apps Script
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
             
-            // Con no-cors, no podemos leer la respuesta, pero si no hay error, asumimos éxito
             return { success: true };
             
         } catch (error) {
@@ -353,15 +603,37 @@
         }
     }
     
-    // Envío del formulario
+    // ============================================
+    // MANEJO DEL FORMULARIO
+    // ============================================
+    
     document.getElementById('mainForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const btn = document.getElementById('submitBtn');
+        const originalText = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = '<span class="loading-spinner"></span> Guardando...';
         
+        const fecha = document.getElementById('fecha_actividad').value;
+        const esFinde = esFinDeSemana(fecha);
+        const weekInfo = getWeekInfo(fecha);
+        
         const data = {
+            // Información de semana y tabla
+            es_fin_de_semana: esFinde,
+            tipo_tabla: esFinde ? 'FIN_DE_SEMANA' : 'ENTRE_SEMANA',
+            fecha_actividad: fecha,
+            dia_semana: getNombreDia(fecha),
+            
+            // Información de la semana
+            numero_semana: weekInfo.numeroSemana,
+            nombre_hoja: weekInfo.nombreHoja,
+            año: weekInfo.año,
+            rango_semana: weekInfo.rangoCorto,
+            es_semana_53: weekInfo.esSemana53,
+            
+            // Datos del formulario
             linea: document.querySelector('input[name="linea"]').value,
             actividad: document.querySelector('input[name="actividad"]').value,
             avance_semanal: document.querySelector('input[name="avance_semanal"]').value || '',
@@ -369,20 +641,32 @@
             ot: document.querySelector('input[name="ot"]').value,
             responsables: getResponsablesTexto(),
             responsable_principal: document.querySelector('input[name="responsable_principal"]').value || '',
-            dia: document.querySelector('input[name="dia"]').value || '',
+            dia: document.getElementById('dia_auto').value,
             numero_personas: document.getElementById('numero_personas').value || '',
             horas_trabajadas: document.getElementById('horas_trabajadas').value || '',
             actividades: document.querySelector('textarea[name="actividades"]').value || ''
         };
         
-        console.log('Datos enviados:', data);
+        console.log('📤 Enviando datos:', data);
         
         try {
             const result = await saveToGoogleSheets(data);
             
             if (result.success) {
-                showMessage('✅ ¡Registro guardado exitosamente en Google Sheets!', 'success');
+                const tipoMensaje = esFinde ? 'FIN DE SEMANA' : 'ENTRE SEMANA';
+                showMessage(
+                    `✅ ¡Registro guardado exitosamente!\n` +
+                    `📁 Hoja: ${weekInfo.nombreHoja}\n` +
+                    `📊 Tabla: ${tipoMensaje}`, 
+                    'success'
+                );
+                
+                // Reset del formulario
                 e.target.reset();
+                
+                // Mantener la fecha actual
+                const hoy = new Date().toISOString().split('T')[0];
+                document.getElementById('fecha_actividad').value = hoy;
                 document.getElementById('numero_personas').value = '1';
                 document.getElementById('horas_trabajadas').value = '';
                 
@@ -394,30 +678,55 @@
                 const firstInput = container.querySelector('input');
                 if (firstInput) firstInput.value = '';
                 
+                // Actualizar indicadores
+                actualizarIndicadoresFecha();
+                
+                // Feedback visual
                 btn.style.background = '#4caf50';
                 setTimeout(() => {
                     btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
                 }, 1000);
             } else {
-                throw new Error(result.error);
+                throw new Error(result.error || 'Error desconocido');
             }
         } catch (error) {
             showMessage(`❌ Error: ${error.message}`, 'error');
+            console.error('Error detallado:', error);
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '💾 Guardar en Google Sheets';
+            btn.innerHTML = originalText;
         }
     });
     
-    // Inicializar
-    updateTime();
-    setInterval(updateTime, 1000);
-    testConnection();
+    // ============================================
+    // INICIALIZACIÓN
+    // ============================================
     
-    setTimeout(() => {
-        const firstBtn = document.querySelector('.responsable-item .btn-remove');
-        if (firstBtn) firstBtn.style.display = 'none';
-    }, 100);
+    window.addEventListener('DOMContentLoaded', () => {
+        // Inicializar fecha
+        const fechaInput = document.getElementById('fecha_actividad');
+        const hoy = new Date().toISOString().split('T')[0];
+        fechaInput.value = hoy;
+        
+        // Configurar listeners
+        fechaInput.addEventListener('change', actualizarIndicadoresFecha);
+        
+        // Actualizar hora y fecha
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+        
+        // Probar conexión
+        testConnection();
+        
+        // Inicializar indicadores
+        actualizarIndicadoresFecha();
+        
+        // Ocultar botón remove del primer responsable
+        setTimeout(() => {
+            const firstBtn = document.querySelector('.responsable-item .btn-remove');
+            if (firstBtn) firstBtn.style.display = 'none';
+        }, 100);
+    });
 </script>
 </body>
 </html>
